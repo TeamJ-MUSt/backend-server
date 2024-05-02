@@ -2,59 +2,87 @@ package TeamJ.MUSt;
 
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.service.song.SongInfo;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PythonExecutor {
     static String queryFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\queries.txt";
-    static String pythonFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\fetch.py";
-    static String noResultMessage = "Unrecognized token 'None': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')";
+    static String searchScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\search.py";
+    static String lyricsScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\lyrics.py";
 
-    public static SongInfo callBugsApi(String title, String artist) throws NoSearchResultException {
-        SongInfo result = null;
+
+    public static List<SongInfo> callBugsApi(String title, String artist) throws NoSearchResultException {
+        List<SongInfo> searchResults = new ArrayList<>();
         makeQuery(title, artist);
 
         try {
-            ProcessBuilder pb = new ProcessBuilder("python", pythonFile, queryFile);
-            Process p = pb.start();
+            ProcessBuilder searchProcessBuilder = new ProcessBuilder("python", searchScript, queryFile);
+            Process searchProcess = searchProcessBuilder.start();
 
-            result = callApi(p);
-            printErrorMessage(p);
+            searchResults = getSearchResult(searchProcess);
+
+            List<SongInfo> garbageList = new ArrayList<>();
+
+            for (SongInfo searchResult : searchResults) {
+                String id = searchResult.getMusic_id();
+                if (id == null) {
+                    garbageList.add(searchResult);
+                    continue;
+                }
+                ProcessBuilder lyricsProcessBuilder = new ProcessBuilder("python", lyricsScript, id);
+                Process lyricsProcess = lyricsProcessBuilder.start();
+                String lyrics = getLyrics(lyricsProcess);
+                searchResult.setLyrics(lyrics);
+            }
+
+            for (SongInfo songInfo : garbageList) {
+                searchResults.remove(songInfo);
+            }
+
+            if (searchResults.isEmpty())
+                throw new NoSearchResultException();
+
         } catch (IOException e) {
             System.out.println(e.getMessage());
-            throw new NoSearchResultException();
         }
-        return result;
+        return searchResults;
     }
 
-    private static void printErrorMessage(Process p) throws IOException{
-        InputStream errorStream = p.getErrorStream();
-        BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+    private static List<SongInfo> getSearchResult(Process p) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
 
-        String errorLine;
-        while ((errorLine = errorReader.readLine()) != null) {
-            System.out.println(errorLine);
-        }
+        String str = "";
+        str = br.readLine();
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<List<SongInfo>> nestedList = mapper.readValue(str, new TypeReference<List<List<SongInfo>>>() {
+        });
+        return new ArrayList<>(nestedList.get(0));
     }
 
-    private static SongInfo callApi(Process p) throws IOException {
+    private static String getLyrics(Process p) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
 
         String str = "";
         int line = 0;
         StringBuilder sb = new StringBuilder();
         str = br.readLine();
-        str = str.replaceAll("'", "\"");
-        ObjectMapper mapper = new ObjectMapper();
-        SongInfo[] songs = mapper.readValue(str, SongInfo[].class);
-        return songs[0];
+        return str;
     }
 
     private static void makeQuery(String title, String artist) {
         try (PrintWriter pw = new PrintWriter(queryFile)) {
-            pw.println(title + " " + artist);
+            if (title == null)
+                pw.println(artist);
+            else if (artist == null)
+                pw.println(title);
+            else
+                pw.println(title + " " + artist);
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }

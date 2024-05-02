@@ -1,13 +1,11 @@
 import argparse
 import json
 import os
-import sys
 
 from src import bugs
 from src import utils
 
-sys.stdout.reconfigure(encoding='utf-8')
-bugs.max_delay = 0
+bugs.max_delay = 3
 
 def is_file(string):
     _, file_extension = os.path.splitext(string)
@@ -17,8 +15,7 @@ def get_query_result(search_query, verbose = False):
     query = search_query.strip()
     if verbose:
         print("Querying:", query)
-    result = bugs.find_lyrics(query)
-    result['lyrics'] = utils.remove_korean_lines(result['lyrics'])
+    result = bugs.search_results(query)
     return result
 
 def main():
@@ -44,7 +41,8 @@ def main():
         results.append(query_result)
 
     if not args.out:
-        print(results)
+        json_str = json.dumps(results, separators=(',', ':'), ensure_ascii=False)
+        print(json_str)
     else:
         with open(args.out, 'w', encoding='UTF-8') as json_file:
             json.dump(results, json_file, indent=4, ensure_ascii=False)
