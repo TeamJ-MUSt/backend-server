@@ -1,22 +1,37 @@
 package TeamJ.MUSt;
 
-import TeamJ.MUSt.exception.NoSearchResultException;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import TeamJ.MUSt.service.song.SongInfo;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
 
 
 public class PythonExecutorTest {
+    @Test
+    public void 노래_검색() throws Exception {
+        List<SongInfo> songInfos = PythonExecutor.callBugsApi("betelgeuse", "yuuri");
+        for (SongInfo songInfo : songInfos)
+            System.out.println(songInfo);
+    }
 
     @Test
-    @DisplayName("검색 결과에 오류가 있으면 예외 발생")
-    public void quoteTest() throws Exception{
-        assertThrows(NoSearchResultException.class, ()->{
-            PythonExecutor.callBugsApi("a milli", "lil wayne");
-        });
+    public void 가사에_따옴표가_들어간_노래_검색() throws Exception {
+        List<SongInfo> songInfos = PythonExecutor.callBugsApi("bling-bang-bang-born", "creepy nuts");
+        for (SongInfo songInfo : songInfos)
+            System.out.println(songInfo);
+    }
+
+    @Test
+    public void 가수만_검색() throws Exception {
+        List<SongInfo> songInfos = PythonExecutor.callBugsApi(null, "lil wayne");
+        for (SongInfo songInfo : songInfos)
+            System.out.println(songInfo);
+    }
+
+    @Test
+    public void 노래만_검색() throws Exception {
+        List<SongInfo> songInfos = PythonExecutor.callBugsApi("song cry", null);
+        for (SongInfo songInfo : songInfos)
+            System.out.println(songInfo);
     }
 }

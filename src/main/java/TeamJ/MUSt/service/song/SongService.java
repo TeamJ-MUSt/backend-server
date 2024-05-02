@@ -33,53 +33,29 @@ public class SongService {
     public List<Song> findUserSong(Long memberId, Pageable pageRequest) {
         return songRepository.findWithMemberSong(memberId, pageRequest);
     }
-    public Song searchSong(Long memberId, String title, String artist) throws NoSearchResultException {
-        List<Song> songs = songRepository.findRequestSong(memberId, title,artist);
-        if(songs.isEmpty()){
-            System.out.println("노래가 없어서 검색");
-            SongInfo songInfo = PythonExecutor.callBugsApi(title, artist);
-            byte[] thumbnail = imageToByte(songInfo.getThumbnailUrl());
-            return songRepository.save(new Song(
-                    songInfo.getTitle(),
-                    songInfo.getArtist().split("\\((.*?)\\)")[0],
-                    songInfo.getLyrics(),
-                    thumbnail));
-        }
-        else
-            return songs.get(0);
+    public List<Song> searchMySong(Long memberId, String title, String artist){
+        return songRepository.findInMySong(memberId, title, artist);
+    }
+    public List<Song> searchDbSong(String title, String artist){
+        System.out.println("노래가 없어서 검색");
+        /*List<SongInfo> songInfo = PythonExecutor.callBugsApi(title, artist);
+        List<Song> searchedSongs = songInfo.stream().map(info -> new Song(
+                info.getTitle(),
+                info.getArtist().split("\\((.*?)\\)")[0],
+                info.getLyrics(),
+                imageToByte(info.getThumbnailUrl()),
+                Long.valueOf(info.getMusic_id())
+        )).toList();
+        songRepository.saveAll(searchedSongs);*/
+        return songRepository.findRequestSong(title, artist);
     }
 
     @Transactional
-    public String registerSong(Long userId, Long songId) {
-        Song song = songRepository.findById(songId).get();
+    public String registerSong(Long userId, Long songId) throws NoSearchResultException {
         Member member = memberRepository.findById(userId).get();
+        Song newSong = songRepository.findById(songId).get();
         MemberSong memberSong = new MemberSong();
-        memberSong.createMemberSong(member, song);
-        return song.getTitle() + " " + song.getArtist() + "가 성공적으로 등록되었습니다.";
+        memberSong.createMemberSong(member, newSong);
+        return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
     }
-
-    public byte[] imageToByte(String imageURL){
-        byte[] imageBytes = null;
-        try {
-            URL url = new URL(imageURL);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            InputStream stream = url.openStream();
-
-            while ((bytesRead = stream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            imageBytes = outputStream.toByteArray();
-
-            stream.close();
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return imageBytes;
-    }
-
 }

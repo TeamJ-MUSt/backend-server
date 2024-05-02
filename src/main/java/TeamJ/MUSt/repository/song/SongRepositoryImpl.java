@@ -50,16 +50,25 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
     }
 
     @Override
-    public List<Song> findRequestSong(Long memberId, String title, String artist) {
+    public List<Song> findInMySong(Long memberId, String title, String artist) {
         return queryFactory
                 .selectDistinct(song)
                 .from(song)
                 .join(song.memberSongs, memberSong)
                 .fetchJoin()
-                .where(memberSong.member.id.eq(memberId))
+                .where(memberSong.member.id.eq(memberId), titleEq(title), artistEq(artist))
+                .fetch();
+    }
+
+    @Override
+    public List<Song> findRequestSong(String title, String artist) {
+        return queryFactory
+                .select(song)
+                .from(song)
                 .where(titleEq(title), artistEq(artist))
                 .fetch();
     }
+
 
     @Override
     public int countSearchResult(String title, String artist) {

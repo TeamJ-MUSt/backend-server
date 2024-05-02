@@ -10,7 +10,8 @@ import java.util.List;
 public interface SongRepositoryCustom {
     List<Word> findUsedWords(Long songId);
 
-    List<Song> findRequestSong(Long memberId, String title, String artist);
+    List<Song> findInMySong(Long memberId, String title, String artist);
+    List<Song> findRequestSong(String title, String artist);
 
     int countSearchResult(String title, String artist);
     List<Song> findWithMemberSong(Long memberId);

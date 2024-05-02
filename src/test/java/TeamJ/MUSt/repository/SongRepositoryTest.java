@@ -33,7 +33,7 @@ public class SongRepositoryTest {
 
     @Test
     public void 요청_노래_찾기_제목과_가수() throws Exception {
-        List<Song> requestSong = songRepository.findRequestSong(1l, "BETELGEUSE", "Yuuri");
+        List<Song> requestSong = songRepository.findInMySong(1l, "BETELGEUSE", "Yuuri");
         assertThat(requestSong.size()).isEqualTo(1);
         assertThat(requestSong.get(0).getTitle()).isEqualTo("BETELGEUSE");
         assertThat(requestSong.get(0).getArtist()).isEqualTo("Yuuri");
@@ -41,7 +41,7 @@ public class SongRepositoryTest {
 
     @Test
     public void 요청_노래_찾기_제목만() throws Exception {
-        List<Song> requestSong = songRepository.findRequestSong(1l, "BETELGEUSE", null);
+        List<Song> requestSong = songRepository.findInMySong(1l, "BETELGEUSE", null);
         assertThat(requestSong.size()).isEqualTo(2);
         assertThat(requestSong.get(0).getArtist()).isEqualTo("Yuuri");
         assertThat(requestSong.get(1).getArtist()).isEqualTo("KSUKE");
@@ -49,7 +49,7 @@ public class SongRepositoryTest {
 
     @Test
     public void 요청_노래_찾기_가수만() throws Exception {
-        List<Song> requestSong = songRepository.findRequestSong(1l, null, "Yuuri");
+        List<Song> requestSong = songRepository.findInMySong(1l, null, "Yuuri");
         assertThat(requestSong.size()).isEqualTo(2);
         assertThat(requestSong.get(0).getTitle()).isEqualTo("BETELGEUSE");
         assertThat(requestSong.get(0).getArtist()).isEqualTo("Yuuri");
@@ -58,20 +58,20 @@ public class SongRepositoryTest {
     }
     @Test
     public void 제목_가수로_대소문자_구분하지_않고_조회() throws Exception{
-        List<Song> songs = songRepository.findRequestSong(1l, "betelgeuse", "yuuri");
+        List<Song> songs = songRepository.findInMySong(1l, "betelgeuse", "yuuri");
         assertThat(songs.size()).isEqualTo(1);
         assertThat(songs.get(0).getId()).isEqualTo(1);
     }
     @Test
     public void 제목만으로_대소문자_구분하지_않고_조회() throws Exception{
-        List<Song> songs = songRepository.findRequestSong(1l, "betelgeuse", null);
+        List<Song> songs = songRepository.findInMySong(1l, "betelgeuse", null);
         assertThat(songs.size()).isEqualTo(2);
         assertThat(songs.get(0).getId()).isEqualTo(1);
         assertThat(songs.get(1).getId()).isEqualTo(7);
     }
     @Test
     public void 가수만으로_대소문자_구분하지_않고_조회() throws Exception{
-        List<Song> songs = songRepository.findRequestSong(1l, null, "yuuri");
+        List<Song> songs = songRepository.findInMySong(1l, null, "yuuri");
         assertThat(songs.size()).isEqualTo(2);
         assertThat(songs.get(0).getId()).isEqualTo(1);
         assertThat(songs.get(1).getId()).isEqualTo(6);

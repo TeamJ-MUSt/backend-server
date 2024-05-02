@@ -2,9 +2,11 @@ package TeamJ.MUSt.service.song;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class SongInfo{
     private String music_id;
     private String title;

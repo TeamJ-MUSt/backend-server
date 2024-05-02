@@ -14,22 +14,22 @@ def set_max_delay(delay : float):
         delay = 0
     max_delay = delay
 
-def find_lyrics(search_keyword : str):
+def search_results(search_keyword : str):
     bugs_search_url = f"https://music.bugs.co.kr/search/integrated?q={search_keyword}"
 
     __random_delay()
     search_results = __find_music_info_from_search_result(bugs_search_url)
+    return search_results
 
-    for search_result in search_results[:1]:
-        music_page_url = f"https://music.bugs.co.kr/track/{search_result['music_id']}"
-        __random_delay()
-        lyrics = __get_lyrics_from_music_page(music_page_url)
-        if lyrics is not None:
-            search_result['lyrics'] = lyrics
-        else:
-            search_result['lyrics'] = ""
-        return search_result
-    return None
+
+def find_lyrics(music_id : str):
+    music_page_url = f"https://music.bugs.co.kr/track/{music_id}"
+    __random_delay()
+    lyrics = __get_lyrics_from_music_page(music_page_url)
+    if lyrics is not None:
+        return lyrics
+    else:
+        return ""
 
 def __print_error(*args, **kwargs):
     if verbose:

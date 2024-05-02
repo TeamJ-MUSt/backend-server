@@ -1,8 +1,6 @@
 package TeamJ.MUSt.controller.song;
 
-import TeamJ.MUSt.controller.song.dto.HomeDto;
-import TeamJ.MUSt.controller.song.dto.SongDto;
-import TeamJ.MUSt.controller.song.dto.SongSearch;
+import TeamJ.MUSt.controller.song.dto.*;
 import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.song.SongRepository;
@@ -30,29 +28,55 @@ public class SongController {
                         s.getId(),
                         s.getTitle(),
                         s.getArtist(),
-                        new String(s.getLyric()),
-                        true)
+                        new String(s.getLyric()))
                 ).toList();
         return new HomeDto(list, 5, 5);
 
     }
 
     @GetMapping("/{memberId}/search")
-    public SongDto search(@PathVariable("memberId") Long memberId, @ModelAttribute SongSearch songSearch){
+    public SearchResultDto searchOwnSong(@PathVariable("memberId") Long memberId, @ModelAttribute SongSearch songSearch){
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
-        Song findSong = null;
-        try {
-            findSong = songService.searchSong(memberId, title, artist);
-        } catch (NoSearchResultException e) {
-            return new SongDto();
-        }
-        return new SongDto(findSong.getId(), findSong.getTitle(), findSong.getArtist(), new String(findSong.getLyric()), true);
+        List<Song> searchedSong = null;
+        searchedSong = songService.searchMySong(memberId, title, artist);
+
+        if(searchedSong.isEmpty())
+            return new SearchResultDto(null, false);
+
+        return new SearchResultDto(
+                searchedSong.stream().map(song -> new SongDto(
+                        song.getId(),
+                        song.getTitle(),
+                        song.getArtist(),
+                        new String(song.getLyric())
+                        )).toList(),
+                true);
     }
 
-    @PostMapping("/songs/{userId}/{songId}")
-    public String register(@PathVariable("userId") Long userId, @PathVariable("songId") Long songId){
-        return songService.registerSong(userId, songId);
+    @GetMapping("/search")
+    public SearchResultDto searchInDb(@ModelAttribute SongSearch songSearch){
+        String title = songSearch.getTitle();
+        String artist = songSearch.getArtist();
+        List<Song> searchedSong = null;
+        searchedSong = songService.searchDbSong(title, artist);
+
+        if(searchedSong.isEmpty())
+            return new SearchResultDto(null, false);
+
+        return new SearchResultDto(
+                searchedSong.stream().map(song -> new SongDto(
+                        song.getId(),
+                        song.getTitle(),
+                        song.getArtist(),
+                        new String(song.getLyric())
+                        )).toList(),
+                true);
+    }
+
+    @PostMapping("/songs/new")
+    public String register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException {
+        return songService.registerSong(registerDto.getMemberId(), registerDto.getSongId());
     }
 
     @GetMapping(value = "/image/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)

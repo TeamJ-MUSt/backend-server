@@ -4,15 +4,20 @@ import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.domain.MemberSong;
 import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.exception.NoSearchResultException;
+import TeamJ.MUSt.service.song.SongInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +46,7 @@ public class InitDb {
             for (Member member : members)
                 em.persist(member);
 
-            Song[] songs = new Song[7];
+            Song[] songs = new Song[8];
             songs[0] = createSampleSong("BETELGEUSE", "Yuuri");
             songs[1] = createSampleSong("nandemonaiya", "RADWIMPS");
             songs[2] = createSampleSong("lemon", "Yonezu kenshi");
@@ -49,8 +54,7 @@ public class InitDb {
             songs[4] = createSampleSong("Madou Ito", "Masaki Suda");
             songs[5] = createSampleSong("Leo", "Yuuri");
             songs[6] = createSampleSong("BETELGEUSE", "KSUKE");
-            //Song song4 = new Song("Bling-Bang-Bang-Born", "Creepy Nuts", PythonExecutor.callBugsApi("Bling-Bang-Bang-Born", "Creepy Nuts").getLyrics()
-            //, extractBytes("C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\thumbnail\\Bling-Bang-Bang-Born_Creepy Nuts.jpg"));
+            songs[7] = createSampleSong("Bling-Bang-Bang-Born", "Creepy Nuts");
 
             for (Song song : songs)
                 em.persist(song);
@@ -61,16 +65,55 @@ public class InitDb {
             for(int i = 2; i < songs.length; i++)
                 new MemberSong().createMemberSong(members[1], songs[i]);
 
+            List<SongInfo> songInfo = PythonExecutor.callBugsApi("sparkle", "radwimps");
+            List<Song> searchedSongs = songInfo.stream().map(info -> {
+                String lyrics = info.getLyrics();
+                int length = lyrics.length();
+                return new Song(
+                        info.getTitle(),
+                        info.getArtist().split("\\((.*?)\\)")[0],
+                        length == 4 ? "" : lyrics.substring(2, length - 2),
+                        imageToByte(info.getThumbnailUrl())
+                );
+            }).toList();
+            for (Song song : searchedSongs)
+                em.persist(song);
+
         }
     }
 
     private static Song createSampleSong(String title, String artist) throws IOException, NoSearchResultException {
-        return new Song(title, artist, PythonExecutor.callBugsApi(title, artist).getLyrics()
-                , extractBytes(prefix + title + "_" + artist + suffix));
+        List<SongInfo> songInfos = PythonExecutor.callBugsApi(title, artist);
+        SongInfo firstSong = songInfos.get(0);
+        String lyrics = firstSong.getLyrics();
+        if(lyrics.length() == 4)
+            lyrics = "";
+        else
+            lyrics = lyrics.substring(2, lyrics.length() - 2);
+        return new Song(title, artist, lyrics, imageToByte(firstSong.getThumbnailUrl()));
     }
 
-    public static byte[] extractBytes(String imagePath) throws IOException {
-        return Files.readAllBytes(new File(imagePath).toPath());
-    }
+    public static byte[] imageToByte(String imageURL){
+        byte[] imageBytes = null;
+        try {
+            URL url = new URL(imageURL);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            InputStream stream = url.openStream();
+
+            while ((bytesRead = stream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            imageBytes = outputStream.toByteArray();
+
+            stream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageBytes;
+    }
 }

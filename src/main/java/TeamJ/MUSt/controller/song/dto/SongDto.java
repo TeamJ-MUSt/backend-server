@@ -8,13 +8,11 @@ public class SongDto{
     String title;
     String artist;
     String lyrics;
-    Boolean success;
-    public SongDto(Long songId, String title, String artist, String lyrics, Boolean success) {
+    public SongDto(Long songId, String title, String artist, String lyrics) {
         this.songId = songId;
         this.title = title;
         this.artist = artist;
         this.lyrics = lyrics;
-        this.success = true;
     }
 
     public SongDto() {
