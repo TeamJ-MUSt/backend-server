@@ -20,9 +20,8 @@ public class SongController {
     private final SongRepository songRepository;
 
     @GetMapping(value = "/main/songs/{memberId}")
-    public HomeDto songs(@PathVariable("memberId") Long memberId, @RequestParam("pageNum") int pageNum){
-        PageRequest pageRequest = PageRequest.of(pageNum, 6);
-        List<Song> userSong = songService.findUserSong(memberId, pageRequest);
+    public HomeDto songs(@PathVariable("memberId") Long memberId){
+        List<Song> userSong = songService.findUserSong(memberId);
         List<SongDto> list = userSong.stream()
                 .map(s -> new SongDto(
                         s.getId(),
