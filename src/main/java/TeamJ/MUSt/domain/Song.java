@@ -29,7 +29,7 @@ public class Song {
     @OneToMany(mappedBy = "song")
     private List<MemberSong> memberSongs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "song", orphanRemoval = true)
+    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<SongWord> songWords = new ArrayList<>();
 
     public Song(String title, String artist, String lyrics, byte[] thumbnail) {

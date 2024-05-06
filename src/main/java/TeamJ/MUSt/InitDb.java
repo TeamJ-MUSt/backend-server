@@ -1,9 +1,8 @@
 package TeamJ.MUSt;
 
-import TeamJ.MUSt.domain.Member;
-import TeamJ.MUSt.domain.MemberSong;
-import TeamJ.MUSt.domain.Song;
+import TeamJ.MUSt.domain.*;
 import TeamJ.MUSt.exception.NoSearchResultException;
+import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.service.song.SongInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -15,9 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class InitDb {
     static private String prefix = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\thumbnail\\";
@@ -35,7 +35,8 @@ public class InitDb {
     @RequiredArgsConstructor
     static class InitService{
         private final EntityManager em;
-
+        private final WordExtractor wordExtractor;
+        private final WordRepository wordRepository;
         public void initDb() throws IOException, NoSearchResultException {
             Member[] members = new Member[2];
             members[0] = new Member("member1");
@@ -54,8 +55,33 @@ public class InitDb {
             songs[6] = createSampleSong("BETELGEUSE", "KSUKE");
             songs[7] = createSampleSong("Bling-Bang-Bang-Born", "Creepy Nuts");
 
-            for (Song song : songs)
+            for (Song song : songs){
                 em.persist(song);
+                List<WordInfo> wordInfos = wordExtractor.extractWords(song.getId());
+                for (WordInfo wordInfo : wordInfos) {
+                    String spelling = wordInfo.getLemma();
+                    Word findWord = wordRepository.findBySpelling(spelling);
+
+                    if(findWord == null){
+                        List<String> before = wordInfo.getMeaning();
+                        List<Meaning> after = new ArrayList<>();
+                        if(before.size() == 1)
+                            after.add(new Meaning(before.get(0)));
+                        else{
+                            after = before.stream().map(m -> new Meaning(m.substring(2))
+                            ).toList();
+                        }
+                        Word newWord = new Word(wordInfo.getLemma(), wordInfo.getPronunciation(), after, wordInfo.getSpeechFields());
+                        em.persist(newWord);
+                        for (Meaning meaning : after) {
+                            meaning.setWord(newWord);
+                        }
+                        SongWord songWord = new SongWord();
+                        songWord.createSongWord(song, newWord);
+                        song.getSongWords().add(songWord);
+                    }
+                }
+            }
 
             for(int i = 0; i < songs.length; i++)
                 new MemberSong().createMemberSong(members[0], songs[i]);

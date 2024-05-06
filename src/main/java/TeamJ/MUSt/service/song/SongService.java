@@ -1,6 +1,5 @@
 package TeamJ.MUSt.service.song;
 
-import TeamJ.MUSt.PythonExecutor;
 import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.domain.MemberSong;
 import TeamJ.MUSt.domain.Song;
@@ -13,10 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 @Service

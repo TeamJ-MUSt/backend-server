@@ -1,5 +1,6 @@
 package TeamJ.MUSt.repository.wordbook;
 
+import TeamJ.MUSt.domain.Meaning;
 import TeamJ.MUSt.domain.WordBook;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class WordBookQueryDto {
     private String enPro;
     private String japPro;
     private String classOfWord;
-    private String meaning;
+    private List<Meaning> meaning;
     private List<String> involvedSongs = new ArrayList<>();
 
     public WordBookQueryDto(WordBook wordBook) {

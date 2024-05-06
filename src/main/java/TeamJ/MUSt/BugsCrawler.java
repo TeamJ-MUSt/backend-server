@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PythonExecutor {
+public class BugsCrawler {
     static String queryFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\queries.txt";
     static String searchScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\search.py";
     static String lyricsScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\lyrics-fetcher\\lyrics.py";
@@ -69,8 +69,6 @@ public class PythonExecutor {
         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
 
         String str = "";
-        int line = 0;
-        StringBuilder sb = new StringBuilder();
         str = br.readLine();
         return str;
     }

@@ -9,6 +9,9 @@ import java.util.List;
 @Entity
 @Getter
 public class Word {
+    public Word() {
+    }
+
     @Id @GeneratedValue
     @Column(name = "word_id")
     private Long id;
@@ -19,7 +22,8 @@ public class Word {
 
     private String jpPronunciation;
 
-    private String meaning;
+    @OneToMany(mappedBy = "word", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Meaning> meaning;
 
     private String classOfWord;
 
@@ -29,4 +33,11 @@ public class Word {
 
     @OneToMany(mappedBy = "word")
     List<SongWord> songWords = new ArrayList<>();
+
+    public Word(String spelling, String jpPronunciation, List<Meaning> meaning, String classOfWord) {
+        this.spelling = spelling;
+        this.jpPronunciation = jpPronunciation;
+        this.meaning = meaning;
+        this.classOfWord = classOfWord;
+    }
 }

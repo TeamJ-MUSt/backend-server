@@ -1,18 +1,15 @@
 package TeamJ.MUSt.service;
 
-import TeamJ.MUSt.PythonExecutor;
 import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.repository.MemberRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
-import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.service.song.SongService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

@@ -17,4 +17,11 @@ public class SongWord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "word_id")
     private Word word;
+
+    public void createSongWord(Song song, Word word){
+        song.getSongWords().add(this);
+        word.getSongWords().add(this);
+        this.song = song;
+        this.word = word;
+    }
 }

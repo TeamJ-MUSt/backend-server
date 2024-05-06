@@ -24,10 +24,11 @@ public class WordBookRepositoryImpl implements WordBookRepositoryCustom {
 
     @Override
     public long deleteBySpellingAndMeaning(String spelling, String meaning) {
-        return queryFactory
+        /*return queryFactory
                 .delete(wordBook)
                 .where(wordBook.word.spelling.eq(spelling)
-                        .and(wordBook.word.meaning.eq(meaning))).execute();
+                        .and(wordBook.word.meaning.eq(meaning))).execute();*/
+        return 1l;
     }
 
 

@@ -30,7 +30,7 @@ public class QWord extends EntityPathBase<Word> {
 
     public final StringPath jpPronunciation = createString("jpPronunciation");
 
-    public final StringPath meaning = createString("meaning");
+    public final ListPath<Meaning, QMeaning> meaning = this.<Meaning, QMeaning>createList("meaning", Meaning.class, QMeaning.class, PathInits.DIRECT2);
 
     public final QMember member;
 
