@@ -12,11 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 @Component
@@ -65,7 +63,7 @@ public class InitDb {
             for(int i = 2; i < songs.length; i++)
                 new MemberSong().createMemberSong(members[1], songs[i]);
 
-            List<SongInfo> songInfo = PythonExecutor.callBugsApi("sparkle", "radwimps");
+            List<SongInfo> songInfo = BugsCrawler.callBugsApi("sparkle", "radwimps");
             List<Song> searchedSongs = songInfo.stream().map(info -> {
                 String lyrics = info.getLyrics();
                 int length = lyrics.length();
@@ -83,7 +81,7 @@ public class InitDb {
     }
 
     private static Song createSampleSong(String title, String artist) throws IOException, NoSearchResultException {
-        List<SongInfo> songInfos = PythonExecutor.callBugsApi(title, artist);
+        List<SongInfo> songInfos = BugsCrawler.callBugsApi(title, artist);
         SongInfo firstSong = songInfos.get(0);
         String lyrics = firstSong.getLyrics();
         if(lyrics.length() == 4)
