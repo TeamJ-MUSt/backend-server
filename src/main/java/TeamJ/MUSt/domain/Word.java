@@ -34,6 +34,9 @@ public class Word {
     @OneToMany(mappedBy = "word")
     List<SongWord> songWords = new ArrayList<>();
 
+    @OneToMany(mappedBy = "word")
+    List<MemberWord> memberWords = new ArrayList<>();
+
     public Word(String spelling, String jpPronunciation, List<Meaning> meaning, String classOfWord) {
         this.spelling = spelling;
         this.jpPronunciation = jpPronunciation;

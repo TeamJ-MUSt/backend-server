@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Entity
 @Getter
-public class WordBook {
+public class MemberWord {
     @Id @GeneratedValue
-    @Column(name = "user_word_id")
+    @Column(name = "member_word_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -18,11 +18,11 @@ public class WordBook {
     @JoinColumn(name = "word_id")
     private Word word;
 
-    public WordBook(Member member, Word word) {
+    public MemberWord(Member member, Word word) {
         this.member = member;
         this.word = word;
     }
-    public WordBook(){
+    public MemberWord(){
 
     }
 }

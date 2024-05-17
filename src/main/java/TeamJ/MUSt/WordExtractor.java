@@ -52,6 +52,33 @@ public class WordExtractor {
         }
         return wordsList;
     }
+    public List<AllFieldWordInfo> extractWordsV2(Long songId) throws IOException {
+        List<AllFieldWordInfo> wordsList = new ArrayList<>();
+        Song findSong = songRepository.findById(songId).get();
+        String lyrics = new String(findSong.getLyric());
+        makeQuery(lyrics);
+
+        try{
+            List<ParsingResult> extractResult = getExtractResult();
+
+            for (ParsingResult result : extractResult) {
+                if(result.getSurface().equals("\\"))
+                    continue;
+                AllFieldWordInfo wordInfo = new AllFieldWordInfo(
+                        result.getSpeechFields(),
+                        result.getPronunciation(),
+                        result.getLemma().split("-")[0]);
+                MeaningResult meaningResult = getMeaningResult(wordInfo.getLemma());
+                if(meaningResult != null) {
+                    wordInfo.setMeaning(meaningResult.getDefinitions());
+                    wordsList.add(wordInfo);
+                }
+            }
+        }catch (IOException e){
+            System.out.println(e.getMessage());
+        }
+        return wordsList;
+    }
     private void makeQuery(String lyrics) {
         try (PrintWriter pw = new PrintWriter(queryFile)) {
             pw.println(lyrics);

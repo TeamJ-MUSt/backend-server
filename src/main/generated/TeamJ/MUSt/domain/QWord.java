@@ -34,6 +34,8 @@ public class QWord extends EntityPathBase<Word> {
 
     public final QMember member;
 
+    public final ListPath<MemberWord, QMemberWord> memberWords = this.<MemberWord, QMemberWord>createList("memberWords", MemberWord.class, QMemberWord.class, PathInits.DIRECT2);
+
     public final ListPath<SongWord, QSongWord> songWords = this.<SongWord, QSongWord>createList("songWords", SongWord.class, QSongWord.class, PathInits.DIRECT2);
 
     public final StringPath spelling = createString("spelling");

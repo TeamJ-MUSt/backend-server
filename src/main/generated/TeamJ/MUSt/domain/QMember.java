@@ -24,6 +24,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<MemberSong, QMemberSong> memberSongs = this.<MemberSong, QMemberSong>createList("memberSongs", MemberSong.class, QMemberSong.class, PathInits.DIRECT2);
 
+    public final ListPath<MemberWord, QMemberWord> memberWords = this.<MemberWord, QMemberWord>createList("memberWords", MemberWord.class, QMemberWord.class, PathInits.DIRECT2);
+
     public final StringPath username = createString("username");
 
     public QMember(String variable) {

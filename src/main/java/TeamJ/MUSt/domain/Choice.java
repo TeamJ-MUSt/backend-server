@@ -15,4 +15,13 @@ public class Choice {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
+
+    public Choice(String choice, Quiz quiz) {
+        this.choice = choice;
+        this.quiz = quiz;
+    }
+
+    public Choice() {
+    }
+
 }

@@ -30,7 +30,7 @@ public class InitDb {
         initService.initDb();
     }
 
-    @Component
+    //@Component
     @Transactional
     @RequiredArgsConstructor
     static class InitService{
@@ -66,7 +66,7 @@ public class InitDb {
                         List<String> before = wordInfo.getMeaning();
                         List<Meaning> after = new ArrayList<>();
                         if(before.size() == 1)
-                            after.add(new Meaning(before.get(0)));
+                            after.add(new Meaning(before.get(0).trim()));
                         else{
                             after = before.stream().map(m -> new Meaning(m.substring(2))
                             ).toList();

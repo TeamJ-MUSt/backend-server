@@ -15,4 +15,13 @@ public class Answer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
+
+    public Answer(String answer, Quiz quiz) {
+        this.answer = answer;
+        this.quiz = quiz;
+    }
+
+    public Answer() {
+
+    }
 }

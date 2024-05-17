@@ -17,9 +17,11 @@ public class Member {
     @Column(name = "name")
     private String username;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     List<MemberSong> memberSongs = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<MemberWord> memberWords = new ArrayList<>();
     public Member(String username) {
         this.username = username;
     }
