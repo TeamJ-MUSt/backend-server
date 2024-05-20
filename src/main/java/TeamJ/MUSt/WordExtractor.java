@@ -14,10 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -27,8 +24,10 @@ public class WordExtractor {
     static String meaningScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\search_definitions.py";
     private final SongRepository songRepository;
     public List<WordInfo> extractWords(Song newSong) throws IOException {
-        if(newSong.getLyric() == null || newSong.getLyric().length == 0)
+        if(newSong.getLyric() == null || newSong.getLyric().length == 0){
+            newSong.setLevel(0);
             return null;
+        }
 
         List<WordInfo> wordsList = new ArrayList<>();
         //Song findSong = songRepository.findById(songId).get();
@@ -39,6 +38,7 @@ public class WordExtractor {
         int levelCount = 0;
 
         try{
+            HashMap<Integer, Integer> map = new HashMap<>();
             List<ParsingResult> extractResult = getExtractResult();
             StringBuilder sb = new StringBuilder();
             for (ParsingResult item : extractResult)
@@ -50,9 +50,9 @@ public class WordExtractor {
 
             for(int i = 0; i < meaningResult.size(); i++){
                 ParsingResult current = extractResult.get(i);
+                map.merge(meaningResult.get(i).level, 1, Integer::sum);
                 if(current.getSurface().equals("\\"))
                     continue;
-
                 if(meaningResult.get(i).level != -1){
                     levelSum += meaningResult.get(i).level;
                     levelCount++;
@@ -68,10 +68,14 @@ public class WordExtractor {
                     wordsList.add(wordInfo);
                 }
             }
+            System.out.println(map);
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
-        newSong.setLevel(Math.round((float) levelSum / levelCount));
+        if(levelCount == 0)
+            newSong.setLevel(0);
+        else
+            newSong.setLevel(Math.round((float) levelSum / levelCount));
         return wordsList;
     }
 

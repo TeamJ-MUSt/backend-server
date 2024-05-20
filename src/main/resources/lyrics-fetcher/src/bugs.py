@@ -67,7 +67,7 @@ def __find_music_info_from_search_result(url: str):
                 if thumbnail_a_element:
                     img_tag = thumbnail_a_element.find('img')
                     if img_tag:
-                        result["thumbnailUrl"] = img_tag.get('src')
+                        result["thumbnailUrl"] = img_tag.get('src').replace('/50/','/200/')
                 if th_element:
                     p_tag = th_element.find('p')
                     if p_tag:

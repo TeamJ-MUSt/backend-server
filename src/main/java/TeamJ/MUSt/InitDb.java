@@ -17,11 +17,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class InitDb {
-    static private String prefix = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\thumbnail\\";
-    static private String suffix = ".jpg";
 
     private final InitService initService;
 
@@ -30,7 +28,7 @@ public class InitDb {
         initService.initDb();
     }
 
-    @Component
+    //@Component
     @Transactional
     @RequiredArgsConstructor
     static class InitService{

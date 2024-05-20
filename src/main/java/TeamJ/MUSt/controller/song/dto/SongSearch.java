@@ -9,4 +9,7 @@ public class SongSearch {
     private String title;
     private String artist;
     private Integer pageNum;
+
+    public SongSearch() {
+    }
 }

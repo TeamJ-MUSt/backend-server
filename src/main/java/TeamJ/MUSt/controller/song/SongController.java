@@ -27,7 +27,8 @@ public class SongController {
                         s.getId(),
                         s.getTitle(),
                         s.getArtist(),
-                        new String(s.getLyric()))
+                        new String(s.getLyric()),
+                        s.getLevel())
                 ).toList();
         return new HomeDto(list, 5, 5);
 
@@ -37,6 +38,7 @@ public class SongController {
     public SearchResultDto searchOwnSong(@PathVariable("memberId") Long memberId, @ModelAttribute SongSearch songSearch){
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
+        System.out.println("title = " + title);
         List<Song> searchedSong = null;
         searchedSong = songService.searchMySong(memberId, title, artist);
 
@@ -48,7 +50,8 @@ public class SongController {
                         song.getId(),
                         song.getTitle(),
                         song.getArtist(),
-                        new String(song.getLyric())
+                        new String(song.getLyric()),
+                        song.getLevel()
                         )).toList(),
                 true);
     }
@@ -68,7 +71,8 @@ public class SongController {
                         song.getId(),
                         song.getTitle(),
                         song.getArtist(),
-                        new String(song.getLyric())
+                        new String(song.getLyric()),
+                        song.getLevel()
                         )).toList(),
                 true);
     }
