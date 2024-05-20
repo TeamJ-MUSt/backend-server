@@ -20,7 +20,7 @@ import java.util.List;
 @CrossOrigin(maxAge = 3600)
 @RequiredArgsConstructor
 public class WordController {
-    private final WordRepository wordRepository;
+    /*private final WordRepository wordRepository;
     private final WordExtractor wordExtractor;
     private final SongRepository songRepository;
     @GetMapping("/words")
@@ -54,5 +54,5 @@ public class WordController {
         }
         System.out.println(result.size());
         return result;
-    }
+    }*/
 }

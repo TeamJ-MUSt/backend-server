@@ -23,7 +23,6 @@ public class BugsCrawler {
         try {
             ProcessBuilder searchProcessBuilder = new ProcessBuilder("python", searchScript, queryFile);
             Process searchProcess = searchProcessBuilder.start();
-
             searchResults = getSearchResult(searchProcess);
 
             List<SongInfo> garbageList = new ArrayList<>();
@@ -36,6 +35,7 @@ public class BugsCrawler {
                 }
                 ProcessBuilder lyricsProcessBuilder = new ProcessBuilder("python", lyricsScript, id);
                 Process lyricsProcess = lyricsProcessBuilder.start();
+
                 String lyrics = getLyrics(lyricsProcess);
                 searchResult.setLyrics(lyrics);
             }

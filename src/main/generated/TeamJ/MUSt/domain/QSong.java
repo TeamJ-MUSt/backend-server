@@ -24,7 +24,7 @@ public class QSong extends EntityPathBase<Song> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final EnumPath<Level> level = createEnum("level", Level.class);
+    public final NumberPath<Integer> level = createNumber("level", Integer.class);
 
     public final ArrayPath<char[], Character> lyric = createArray("lyric", char[].class);
 

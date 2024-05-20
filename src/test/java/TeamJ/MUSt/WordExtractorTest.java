@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class WordExtractorTest {
     @Autowired
     WordExtractor wordExtractor;
@@ -22,10 +24,8 @@ class WordExtractorTest {
 
     @Test
     public void 단어_추출() throws Exception{
-        List<WordInfo> wordInfos = wordExtractor.extractWords(1l);
-        for (WordInfo wordInfo : wordInfos) {
-            System.out.println(wordInfo);
-        }
+        //List<WordInfo> wordInfos = wordExtractor.extractWords(1l);
+        //System.out.println(wordInfos.get(0).getLemma());
     }
     @Test
     public void 테스트() throws Exception{

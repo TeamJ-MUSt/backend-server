@@ -17,7 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Component
+@Component
 @RequiredArgsConstructor
 public class InitDb {
     static private String prefix = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\thumbnail\\";
@@ -30,7 +30,7 @@ public class InitDb {
         initService.initDb();
     }
 
-    //@Component
+    @Component
     @Transactional
     @RequiredArgsConstructor
     static class InitService{
@@ -57,21 +57,24 @@ public class InitDb {
 
             for (Song song : songs){
                 em.persist(song);
-                List<WordInfo> wordInfos = wordExtractor.extractWords(song.getId());
+                List<WordInfo> wordInfos = wordExtractor.extractWords(song);
+                if(wordInfos == null)
+                    continue;
+
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();
                     Word findWord = wordRepository.findBySpelling(spelling);
 
                     if(findWord == null){
                         List<String> before = wordInfo.getMeaning();
-                        List<Meaning> after = new ArrayList<>();
-                        if(before.size() == 1)
-                            after.add(new Meaning(before.get(0).trim()));
-                        else{
-                            after = before.stream().map(m -> new Meaning(m.substring(2))
-                            ).toList();
-                        }
-                        Word newWord = new Word(wordInfo.getLemma(), wordInfo.getPronunciation(), after, wordInfo.getSpeechFields());
+                        before = before.stream()
+                                .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();
+                        List<Meaning> after = before.stream().map(Meaning::new).toList();
+                        Word newWord = new Word(
+                                wordInfo.getLemma(),
+                                wordInfo.getPronunciation(),
+                                after,
+                                wordInfo.getSpeechFields());
                         em.persist(newWord);
                         for (Meaning meaning : after) {
                             meaning.setWord(newWord);

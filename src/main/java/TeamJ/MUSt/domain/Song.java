@@ -17,8 +17,7 @@ public class Song {
 
     private String artist;
 
-    @Enumerated(EnumType.STRING)
-    private Level level;
+    private Integer level;
 
     @Lob
     private char[] lyric;
@@ -41,5 +40,9 @@ public class Song {
 
     public Song() {
 
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }

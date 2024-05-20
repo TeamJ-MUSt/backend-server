@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -24,61 +26,55 @@ public class WordExtractor {
     static String extractScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\extract_words.py";
     static String meaningScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\search_definitions.py";
     private final SongRepository songRepository;
-    public List<WordInfo> extractWords(Long songId) throws IOException {
+    public List<WordInfo> extractWords(Song newSong) throws IOException {
+        if(newSong.getLyric() == null || newSong.getLyric().length == 0)
+            return null;
+
         List<WordInfo> wordsList = new ArrayList<>();
-        Song findSong = songRepository.findById(songId).get();
-        String lyrics = new String(findSong.getLyric());
+        //Song findSong = songRepository.findById(songId).get();
+        String lyrics = new String(newSong.getLyric());
         makeQuery(lyrics);
+
+        int levelSum = 0;
+        int levelCount = 0;
 
         try{
             List<ParsingResult> extractResult = getExtractResult();
+            StringBuilder sb = new StringBuilder();
+            for (ParsingResult item : extractResult)
+                sb.append(item.lemma).append(" ");
 
-            for (ParsingResult result : extractResult) {
-                if(result.getSurface().equals("\\"))
+            makeQuery(sb.toString().trim());
+            List<MeaningResult> meaningResult = getMeaningResult();
+
+
+            for(int i = 0; i < meaningResult.size(); i++){
+                ParsingResult current = extractResult.get(i);
+                if(current.getSurface().equals("\\"))
                     continue;
+
+                if(meaningResult.get(i).level != -1){
+                    levelSum += meaningResult.get(i).level;
+                    levelCount++;
+                }
+
                 WordInfo wordInfo = new WordInfo(
-                        result.getSurface(),
-                        result.getSpeechFields().get(0),
-                        result.getPronunciation(),
-                        result.getLemma().split("-")[0]);
-                MeaningResult meaningResult = getMeaningResult(wordInfo.getLemma());
-                if(meaningResult != null) {
-                    wordInfo.setMeaning(meaningResult.getDefinitions());
+                        current.getSurface(),
+                        current.getSpeechFields().get(0),
+                        current.getPronunciation(),
+                        current.getLemma().split("-")[0]);
+                if(meaningResult.get(i).definitions != null) {
+                    wordInfo.setMeaning(meaningResult.get(i).definitions);
                     wordsList.add(wordInfo);
                 }
             }
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
+        newSong.setLevel(Math.round((float) levelSum / levelCount));
         return wordsList;
     }
-    public List<AllFieldWordInfo> extractWordsV2(Long songId) throws IOException {
-        List<AllFieldWordInfo> wordsList = new ArrayList<>();
-        Song findSong = songRepository.findById(songId).get();
-        String lyrics = new String(findSong.getLyric());
-        makeQuery(lyrics);
 
-        try{
-            List<ParsingResult> extractResult = getExtractResult();
-
-            for (ParsingResult result : extractResult) {
-                if(result.getSurface().equals("\\"))
-                    continue;
-                AllFieldWordInfo wordInfo = new AllFieldWordInfo(
-                        result.getSpeechFields(),
-                        result.getPronunciation(),
-                        result.getLemma().split("-")[0]);
-                MeaningResult meaningResult = getMeaningResult(wordInfo.getLemma());
-                if(meaningResult != null) {
-                    wordInfo.setMeaning(meaningResult.getDefinitions());
-                    wordsList.add(wordInfo);
-                }
-            }
-        }catch (IOException e){
-            System.out.println(e.getMessage());
-        }
-        return wordsList;
-    }
     private void makeQuery(String lyrics) {
         try (PrintWriter pw = new PrintWriter(queryFile)) {
             pw.println(lyrics);
@@ -91,37 +87,45 @@ public class WordExtractor {
         Process extractProcess = extractProcessBuilder.start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
-
         String str = br.readLine();
         str = str.replaceAll("\'", "\"");
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(str, new TypeReference<List<ParsingResult>>(){});
     }
-    private MeaningResult getMeaningResult(String word) throws IOException{
-        if(word == null || word.isEmpty() || word.equals(" "))
-            return null;
-        ProcessBuilder meaningProcessBuilder = new ProcessBuilder("python", meaningScript, word);
+
+    private List<MeaningResult> getMeaningResult() throws IOException{
+        List<MeaningResult> results = new ArrayList<>();
+        ProcessBuilder meaningProcessBuilder = new ProcessBuilder("python", meaningScript, queryFile);
         Process meaningProcess = meaningProcessBuilder.start();
-
         BufferedReader br = new BufferedReader(new InputStreamReader(meaningProcess.getInputStream(), StandardCharsets.UTF_8));
-
         String str = br.readLine();
         if(str == null)
             return null;
         str = str.replaceAll("'(\\w+)':", "\"$1\":").replaceAll("'(.*?)'", "\"$1\"");
-
-
+        str = str.substring(2, str.length() - 2);
+        String[] jsonItems = str.split("},\\s*\\{");
         ObjectMapper mapper = new ObjectMapper();
-        MeaningResult meaningResult = null;
-        try{
-            meaningResult = mapper.readValue(str, MeaningResult.class);
-            List<String> definitions = meaningResult.getDefinitions();
-            definitions = definitions.stream().map(String::trim).toList();
-            meaningResult.setDefinitions(definitions);
-        }catch (Exception e){
-            return null;
+        for (String item : jsonItems) {
+            item = "{" + item + "}";
+            try {
+                MeaningResult result = mapper.readValue(item, MeaningResult.class);
+                if (result.definitions.get(0).equals("empty")){
+                    results.add(new MeaningResult());
+                    continue;
+                }
+                result.definitions = result.definitions.stream()
+                        .flatMap(s -> Arrays.stream(s.split(",")))
+                        .map(String::trim)
+                        .filter(s -> s.length() < 25)
+                        .toList();
+                results.add(result);
+            } catch (Exception e) {
+                System.out.println("문제 있는 녀석 " + item);
+                System.out.println(e.getMessage());
+                results.add(new MeaningResult());
+            }
         }
-        return meaningResult;
+        return results;
     }
     @Getter
     @Setter
@@ -140,7 +144,7 @@ public class WordExtractor {
     static private class MeaningResult {
         private String word;
         private List<String> definitions;
-
+        private int level;
         public MeaningResult(){
         }
     }
