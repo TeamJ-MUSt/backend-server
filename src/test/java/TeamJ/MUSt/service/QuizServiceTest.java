@@ -52,13 +52,13 @@ class QuizServiceTest {
     @Test
     public void 유저가_뜻_퀴즈_생성_후_요청() throws Exception{
         List<Quiz> meaningQuiz = quizService.createMeaningQuiz(1l);
-        List<Quiz> quizzes = quizService.findQuizzes(1l, MEANING);
+        List<Quiz> quizzes = quizService.findQuizzes(1l, MEANING, 0);
         assertThat(meaningQuiz.size()).isEqualTo(quizzes.size());
     }
     @Test
     public void 유저가_발음_퀴즈_생성_후_요청() throws Exception{
         List<Quiz> readingQuiz = quizService.createReadingQuiz(1l);
-        List<Quiz> quizzes = quizService.findQuizzes(1l, READING);
+        List<Quiz> quizzes = quizService.findQuizzes(1l, READING, 0);
         assertThat(readingQuiz.size()).isEqualTo(quizzes.size());
     }
 

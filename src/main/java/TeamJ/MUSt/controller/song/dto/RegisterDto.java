@@ -10,7 +10,7 @@ public class RegisterDto {
     private Long songId;
 
 
-    public RegisterDto(Long memberId, String title, String artist, Long songId) {
+    public RegisterDto(Long memberId, Long songId) {
         this.memberId = memberId;
         this.songId = songId;
     }

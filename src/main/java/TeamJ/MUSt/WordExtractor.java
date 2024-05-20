@@ -23,7 +23,7 @@ public class WordExtractor {
     static String extractScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\extract_words.py";
     static String meaningScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\search_definitions.py";
     private final SongRepository songRepository;
-    public List<WordInfo> extractWords(Song newSong) throws IOException {
+    public List<WordInfo> extractWords(Song newSong) {
         if(newSong.getLyric() == null || newSong.getLyric().length == 0){
             newSong.setLevel(0);
             return null;

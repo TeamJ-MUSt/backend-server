@@ -3,6 +3,7 @@ package TeamJ.MUSt.controller.song;
 import TeamJ.MUSt.controller.song.dto.*;
 import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.exception.NoSearchResultException;
+import TeamJ.MUSt.repository.QuizRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
 import TeamJ.MUSt.service.song.SongService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,6 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
     private final SongRepository songRepository;
-
     @GetMapping(value = "/main/songs/{memberId}")
     public HomeDto songs(@PathVariable("memberId") Long memberId){
         List<Song> userSong = songService.findUserSong(memberId);
@@ -38,7 +38,6 @@ public class SongController {
     public SearchResultDto searchOwnSong(@PathVariable("memberId") Long memberId, @ModelAttribute SongSearch songSearch){
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
-        System.out.println("title = " + title);
         List<Song> searchedSong = null;
         searchedSong = songService.searchMySong(memberId, title, artist);
 

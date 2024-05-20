@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -37,7 +38,7 @@ class QuizRepositoryTest {
         Song savedSong = songRepository.save(new Song());
         Quiz quiz1 = quizRepository.save(new Quiz(savedSong, null, MEANING, null, null));
         Quiz quiz2 = quizRepository.save(new Quiz(savedSong, null, MEANING, null, null));
-        List<Quiz> findQuiz = quizRepository.findBySongIdAndType(savedSong.getId(), MEANING);
+        List<Quiz> findQuiz = quizRepository.findBySongIdAndType(savedSong.getId(), MEANING, PageRequest.of(0, 20));
         assertThat(findQuiz.size()).isEqualTo(2);
         assertThat(findQuiz.get(0)).isEqualTo(quiz1);
         assertThat(findQuiz.get(1)).isEqualTo(quiz2);

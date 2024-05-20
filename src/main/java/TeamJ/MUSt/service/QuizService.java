@@ -8,6 +8,9 @@ import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
 import TeamJ.MUSt.repository.wordbook.MemberWordRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +28,16 @@ public class QuizService {
     private final WordRepository wordRepository;
     private final MeaningRepository meaningRepository;
 
-    public List<Quiz> findQuizzes(Long songId, QuizType type){
-        return quizRepository.findBySongIdAndType(songId, type);
+    public List<Quiz> findQuizzes(Long songId, QuizType type, Integer pageNum){
+        Page<Quiz> page = quizRepository.findBySongIdAndType(songId, type, PageRequest.of(pageNum, 20));
+        List<Quiz> result = new ArrayList<>(page.getContent());
+        long totalElements = page.getTotalElements();
+        int totalPages = page.getTotalPages();
+        if(pageNum == totalPages - 2 && totalElements - 20L * (pageNum + 1) <= 10){
+            Page<Quiz> lastPage = quizRepository.findBySongIdAndType(songId, type, PageRequest.of(totalPages - 1, 20));
+            result.addAll(lastPage.getContent());
+        }
+        return result;
     }
 
     @Transactional
