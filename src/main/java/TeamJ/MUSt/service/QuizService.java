@@ -59,7 +59,8 @@ public class QuizService {
         List<Quiz> createdQuiz = new ArrayList<>();
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
-            long count = wordRepository.count();
+            List<Word> words = wordRepository.findByClassOfWord(targetWord.getClassOfWord());
+            long count = words.size();
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
@@ -70,7 +71,7 @@ public class QuizService {
 
             Quiz newQuiz = new Quiz(targetSong, targetWord, MEANING, answerList, choiceList);
 
-            createChoices(randomIds, choiceList, newQuiz, MEANING);
+            createMeaningChoices(randomIds, choiceList, newQuiz, words);
             createAnswer(answerList, targetWord, newQuiz, MEANING);
             quizRepository.save(newQuiz);
             createdQuiz.add(newQuiz);
@@ -86,9 +87,10 @@ public class QuizService {
         Song targetSong = songRepository.findById(songId).get();
         List<SongWord> songWords = targetSong.getSongWords();
         List<Quiz> createdQuiz = new ArrayList<>();
+        List<Word> choiceWords = wordRepository.findWithoutHiragana();
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
-            long count = wordRepository.count();
+            long count = choiceWords.size();
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
@@ -98,7 +100,7 @@ public class QuizService {
 
             Quiz newQuiz = new Quiz(targetSong, targetWord, READING, answerList, choiceList);
 
-            createChoices(randomIds, choiceList, newQuiz, READING);
+            createReadingChoices(randomIds, choiceList, newQuiz, choiceWords);
             createAnswer(answerList, targetWord, newQuiz, READING);
 
             quizRepository.save(newQuiz);
@@ -109,10 +111,6 @@ public class QuizService {
     }
 
     private boolean hasQuizAlready(Long songId, QuizType type) {
-        //Quiz findQuiz= quizRepository.findFirst1BySongIdAndType(songId, type);
-        /*if(findQuiz != null)
-            return true;
-        return false;*/
         return quizRepository.existsBySongIdAndType(songId, type);
     }
 
@@ -125,24 +123,21 @@ public class QuizService {
             answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
     }
 
-    private void createChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, QuizType type) {
-        if(type == MEANING){
-            for (long randomId : randomIds) {
-                Meaning findMeaning = meaningRepository.findFirstByWordId(randomId);
-                if(findMeaning == null){
-                    System.out.println("찾으려 시도한 단어 id" + randomId);
-                }
-                Choice choice = new Choice(findMeaning.getMeaning().trim(), quiz);
-                choiceList.add(choice);
-            }
+    private void createReadingChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
+        for (long randomId : randomIds) {
+            Word selected = words.get((int) randomId);
+            Choice choice = new Choice(selected.getJpPronunciation(), quiz);
+            choiceList.add(choice);
         }
-        else if(type == READING){
-            List<Long> idList = Arrays.stream(randomIds).boxed().toList();
-            List<Word> randomWords = wordRepository.findInIds(idList);
-            for (Word randomWord : randomWords) {
-                Choice choice = new Choice(randomWord.getJpPronunciation(), quiz);
-                choiceList.add(choice);
+    }
+    private void createMeaningChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
+        for (long randomId : randomIds) {
+            Meaning findMeaning = words.get((int) randomId).getMeaning().get(0);
+            if(findMeaning == null){
+                System.out.println("찾으려 시도한 단어 id" + randomId);
             }
+            Choice choice = new Choice(findMeaning.getMeaning().trim(), quiz);
+            choiceList.add(choice);
         }
     }
 
@@ -150,7 +145,7 @@ public class QuizService {
         Random random = new Random();
         random.setSeed(System.currentTimeMillis());
         for(int i = 0; i < 3; i++){
-            long num = random.nextLong(count) + 1;
+            long num = random.nextLong(count);
             for(int j = 0; j < i; j++){
                 if(randomIds[j] == num){
                     i--;

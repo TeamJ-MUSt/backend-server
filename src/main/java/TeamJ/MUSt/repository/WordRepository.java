@@ -24,4 +24,10 @@ public interface WordRepository extends JpaRepository<Word, Long> {
     List<Word> findInIds(@Param("ids") List<Long> ids);
     @Override
     long count();
+
+    //@Query("select w from Word w where w.classOfWord = (:field)")
+    List<Word> findByClassOfWord(@Param("field") String field);
+
+    @Query(nativeQuery = true,value = "select * from word where spelling not REGEXP '^[\\x{3040}-\\x{309F}]$'")
+    List<Word> findWithoutHiragana();
 }
