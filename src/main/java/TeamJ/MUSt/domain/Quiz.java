@@ -40,4 +40,11 @@ public class Quiz {
         this.answers = answers;
         this.choices = choices;
     }
+
+    public Quiz(Song song, QuizType type, List<Answer> answers, List<Choice> choices) {
+        this.song = song;
+        this.type = type;
+        this.answers = answers;
+        this.choices = choices;
+    }
 }

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static TeamJ.MUSt.domain.QuizType.*;
+
 //예외처리
 @RestController
 @RequiredArgsConstructor
@@ -43,10 +46,12 @@ public class QuizController {
     @PostMapping("/quiz/new")
     public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) throws IOException {
         List<Quiz> quizzes = new ArrayList<>();
-        if(type == QuizType.MEANING)
+        if(type == MEANING)
             quizzes = quizService.createMeaningQuiz(songId);
-        else if(type == QuizType.READING)
+        else if(type == READING)
             quizzes = quizService.createReadingQuiz(songId);
+        else if(type == SENTENCE)
+            quizzes = quizService.createSentenceQuiz(songId);
 
         if(quizzes == null || quizzes.isEmpty())
             return new QuizResultDto(false);

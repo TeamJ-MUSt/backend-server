@@ -8,6 +8,7 @@ import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
 import TeamJ.MUSt.repository.wordbook.MemberWordRepository;
 import TeamJ.MUSt.util.NlpModule;
+import TeamJ.MUSt.util.SentenceSplitter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,7 @@ public class QuizService {
     private final SongRepository songRepository;
     private final MemberWordRepository wordBookRepository;
     private final WordRepository wordRepository;
-    private final MeaningRepository meaningRepository;
+    private final SentenceSplitter splitter;
     private final NlpModule module;
 
     public List<Quiz> findQuizzes(Long songId, QuizType type, Integer pageNum){
@@ -118,31 +119,54 @@ public class QuizService {
             Quiz newQuiz = new Quiz(targetSong, targetWord, READING, answerList, choiceList);
 
             createReadingChoices(randomIds, choiceList, newQuiz, choiceWords);
-            createAnswer(answerList, targetWord, newQuiz, READING);
+            createReadingAnswer(answerList, targetWord, newQuiz);
             quizRepository.save(newQuiz);
             createdQuiz.add(newQuiz);
         }
 
         return createdQuiz;
     }
+    @Transactional
+    public List<Quiz> createSentenceQuiz(Long songId) throws IOException {
+        if(hasQuizAlready(songId, SENTENCE))
+            return null;
 
+        Song targetSong = songRepository.findById(songId).get();
+        String[] sentences = new String(targetSong.getLyric()).split("\\\\n");
+        System.out.println("문장 수 : " + sentences.length);
+        System.out.println("문장 : " + sentences[0]);
+        List<Quiz> createdQuiz = new ArrayList<>();
+
+        for (String sentence : sentences) {
+            String[] segments = splitter.splitSentence(sentence);
+            segments = Arrays.stream(segments)
+                    .filter(segment -> !segment.isEmpty() && !segment.contains("u200b"))
+                    .toArray(String[]::new);
+            System.out.println("segments = " + Arrays.toString(segments));
+            List<Choice> choiceList = new ArrayList<>();
+            List<Answer> answerList = new ArrayList<>();
+            Quiz newQuiz = new Quiz(targetSong, null, SENTENCE, answerList, choiceList);
+
+            createSentenceAnswer(answerList, sentence, newQuiz);
+            createSentenceChoices(choiceList, newQuiz, segments);
+            quizRepository.save(newQuiz);
+            createdQuiz.add(newQuiz);
+        }
+
+        return createdQuiz;
+    }
     private boolean hasQuizAlready(Long songId, QuizType type) {
         return quizRepository.existsBySongIdAndType(songId, type);
     }
 
-
-
-    private static void createAnswer(List<Answer> answerList, Word targetWord, Quiz quiz, QuizType type) {
-        if(type == MEANING)
-            answerList.add(new Answer(targetWord.getMeaning().get(0).getMeaning(), quiz));
-        else if(type == READING)
-            answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
-    }
     private static void createMeaningAnswer(List<Answer> answerList, Word targetWord, Quiz quiz, int order){
         answerList.add(new Answer(targetWord.getMeaning().get(order).getMeaning(), quiz));
     }
     private static void createReadingAnswer(List<Answer> answerList, Word targetWord, Quiz quiz){
         answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
+    }
+    private static void createSentenceAnswer(List<Answer> answerList, String sentence, Quiz quiz){
+        answerList.add(new Answer(sentence, quiz));
     }
     private void createReadingChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
         for (long randomId : randomIds) {
@@ -160,6 +184,14 @@ public class QuizService {
             Choice choice = new Choice(findMeaning.getMeaning().trim(), quiz);
             choiceList.add(choice);
         }
+    }
+    private void createSentenceChoices(List<Choice> choiceList, Quiz quiz, String[] segments) {
+        String[] shuffled = new String[segments.length];
+        List<String> list = Arrays.asList(segments);
+
+        Collections.shuffle(list);
+        list.toArray(shuffled);
+        choiceList.addAll(Arrays.stream(shuffled).map(s -> new Choice(s, quiz)).toList());
     }
 
     private static void createRandomIds(long count, long[] randomIds) {

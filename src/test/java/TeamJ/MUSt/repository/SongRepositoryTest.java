@@ -76,4 +76,9 @@ public class SongRepositoryTest {
         assertThat(songs.get(0).getId()).isEqualTo(1);
         assertThat(songs.get(1).getId()).isEqualTo(6);
     }
+
+    @Test
+    public void 가사_불러오기() throws Exception{
+        System.out.println(songRepository.findById(1l).get().getLyric());;
+    }
 }
