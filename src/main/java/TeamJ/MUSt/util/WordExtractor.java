@@ -20,6 +20,7 @@ public class WordExtractor {
     static String queryFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\queries.txt";
     static String extractScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\extract_words.py";
     static String meaningScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\search_definitions.py";
+
     private final SongRepository songRepository;
     public List<WordInfo> extractWords(Song newSong) {
         if(newSong.getLyric() == null || newSong.getLyric().length == 0){
@@ -28,15 +29,13 @@ public class WordExtractor {
         }
 
         List<WordInfo> wordsList = new ArrayList<>();
-        //Song findSong = songRepository.findById(songId).get();
         String lyrics = new String(newSong.getLyric());
         makeQuery(lyrics);
 
-        int levelSum = 0;
-        int levelCount = 0;
 
+        int levelCount = 0;
+        HashMap<Integer, Integer> map = new HashMap<>();
         try{
-            HashMap<Integer, Integer> map = new HashMap<>();
             List<ParsingResult> extractResult = getExtractResult();
             StringBuilder sb = new StringBuilder();
             for (ParsingResult item : extractResult)
@@ -51,10 +50,9 @@ public class WordExtractor {
                 map.merge(meaningResult.get(i).getLevel(), 1, Integer::sum);
                 if(current.getSurface().equals("\\"))
                     continue;
-                if(meaningResult.get(i).getLevel() != -1){
-                    levelSum += meaningResult.get(i).getLevel();
+                if(meaningResult.get(i).getLevel() != -1)
                     levelCount++;
-                }
+
 
                 WordInfo wordInfo = new WordInfo(
                         current.getSurface(),
@@ -72,8 +70,20 @@ public class WordExtractor {
         }
         if(levelCount == 0)
             newSong.setLevel(0);
-        else
-            newSong.setLevel(Math.round((float) levelSum / levelCount));
+        else{
+            float easyQuizNum = ((float)map.get(4) + map.get(5)) / 2;
+            float normalQuizNum = map.get(3);
+            float hardQuizNum = ((float)map.get(1) + map.get(2)) / 2;
+            float max = Math.max(easyQuizNum, Math.max(normalQuizNum, hardQuizNum));
+            int level = 0;
+            if(max == easyQuizNum)
+                level = 1;
+            else if(max == normalQuizNum)
+                level = 2;
+            else
+                level = 3;
+            newSong.setLevel(level);
+        }
         return wordsList;
     }
 
@@ -140,6 +150,7 @@ public class WordExtractor {
         String[] jsonItems = str.split("},\\s*\\{");
         ObjectMapper mapper = new ObjectMapper();
         for (String item : jsonItems) {
+
             item = "{" + item + "}";
             try {
                 MeaningResult result = mapper.readValue(item, MeaningResult.class);

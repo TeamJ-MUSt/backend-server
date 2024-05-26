@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static TeamJ.MUSt.domain.QuizType.*;
 
@@ -31,6 +32,8 @@ public class QuizService {
     private final WordRepository wordRepository;
     private final SentenceSplitter splitter;
     private final NlpModule module;
+
+    private static final Random random = new Random();
 
     public List<Quiz> findQuizzes(Long songId, QuizType type, Integer pageNum){
         Page<Quiz> page = quizRepository.findBySongIdAndType(songId, type, PageRequest.of(pageNum, 20));
@@ -112,7 +115,7 @@ public class QuizService {
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
-
+            System.out.println("이번에 고를 랜덤 : " + Arrays.toString(randomIds));
             List<Choice> choiceList = new ArrayList<>();
             List<Answer> answerList = new ArrayList<>();
 
@@ -133,14 +136,14 @@ public class QuizService {
 
         Song targetSong = songRepository.findById(songId).get();
         String[] sentences = new String(targetSong.getLyric()).split("\\\\n");
-        System.out.println("문장 수 : " + sentences.length);
-        System.out.println("문장 : " + sentences[0]);
         List<Quiz> createdQuiz = new ArrayList<>();
 
         for (String sentence : sentences) {
-            String[] segments = splitter.splitSentence(sentence);
+            String inputSentence = sentence.replaceAll(" ", "");
+            String[] segments = splitter.splitSentence(inputSentence);
             segments = Arrays.stream(segments)
-                    .filter(segment -> !segment.isEmpty() && !segment.contains("u200b"))
+                    .filter(s -> !(s.equals("\\u200b") || s.equals("\\u3000b")))
+                    .map(s -> s.replace("\\u200b", "").replace("\\u3000b", ""))
                     .toArray(String[]::new);
             System.out.println("segments = " + Arrays.toString(segments));
             List<Choice> choiceList = new ArrayList<>();
@@ -166,7 +169,7 @@ public class QuizService {
         answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
     }
     private static void createSentenceAnswer(List<Answer> answerList, String sentence, Quiz quiz){
-        answerList.add(new Answer(sentence, quiz));
+        answerList.add(new Answer(sentence.replace(" ", ""), quiz));
     }
     private void createReadingChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
         for (long randomId : randomIds) {
@@ -195,7 +198,7 @@ public class QuizService {
     }
 
     private static void createRandomIds(long count, long[] randomIds) {
-        Random random = new Random();
+        /*Random random = new Random();
         random.setSeed(System.currentTimeMillis());
         for(int i = 0; i < 3; i++){
             long num = random.nextLong(count);
@@ -206,6 +209,16 @@ public class QuizService {
                 }
             }
             randomIds[i] = num;
+        }*/
+        Set<Long> uniqueIds = new HashSet<>();
+        while (uniqueIds.size() < randomIds.length) {
+            long num = random.nextLong(count);
+            uniqueIds.add(num);
+        }
+
+        int index = 0;
+        for (Long id : uniqueIds) {
+            randomIds[index++] = id;
         }
     }
 }
