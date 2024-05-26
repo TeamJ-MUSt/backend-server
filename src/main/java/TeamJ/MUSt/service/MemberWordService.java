@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,10 +55,15 @@ public class MemberWordService {
         return true;
     }
 
-    public List<WordInfo> similarWords(Long wordId, Integer num) throws IOException {
+    public List<Word> similarWords(Long wordId, Integer num) throws IOException {
         Word word = wordRepository.findById(wordId).get();
         System.out.println(word.getSpelling());
         List<String> similarWords = module.getSimilarWord(word.getSpelling(), num);
-        return wordExtractor.getSimilarWords(similarWords);
+        List<Word> result = new ArrayList<>();
+        for (String similarWord : similarWords) {
+            Word findWord = wordRepository.findBySpelling(similarWord);
+            result.add(findWord);
+        }
+        return result;
     }
 }

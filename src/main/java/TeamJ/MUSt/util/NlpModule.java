@@ -60,8 +60,6 @@ public class NlpModule {
         List<SimilarWord> wordData = null;
         try{
            BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
-           BufferedReader ebr = new BufferedReader(new InputStreamReader(extractProcess.getErrorStream(), StandardCharsets.UTF_8));
-           System.out.println("망항 : " +  ebr.readLine());
            String str = br.readLine().replaceAll("'", "\"");
            System.out.println("str = " + str);
            ObjectMapper mapper = new ObjectMapper();

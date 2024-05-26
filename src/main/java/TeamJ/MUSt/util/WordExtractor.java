@@ -88,6 +88,7 @@ public class WordExtractor {
     }
 
     public List<WordInfo> getSimilarWords(List<String> similarWords) {
+        /*System.out.println("처음에 주어진 단어의 수 : " + similarWords.size());
         List<WordInfo> wordsList = new ArrayList<>();
         try{
             String query = "";
@@ -116,7 +117,8 @@ public class WordExtractor {
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
-        return wordsList;
+        return wordsList;*/
+        return null;
     }
 
     public void makeQuery(String lyrics) {

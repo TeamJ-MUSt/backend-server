@@ -1,5 +1,6 @@
 package TeamJ.MUSt.controller;
 
+import TeamJ.MUSt.domain.Meaning;
 import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.repository.wordbook.MemberWordQueryDto;
 import TeamJ.MUSt.service.MemberWordService;
@@ -46,13 +47,13 @@ public class MemberWordController {
 
     @GetMapping("/word-book/word/{wordId}/similar")
     public SimilarQueryDto similarWord(@PathVariable("wordId") Long wordId, @RequestParam("num") Integer num) throws IOException {
-        List<WordInfo> similarWords = memberWordService.similarWords(wordId, num);
+        List<Word> similarWords = memberWordService.similarWords(wordId, num);
         List<SimilarWordDto> list = similarWords.stream().map(w ->
                 new SimilarWordDto(
-                        w.getLemma(),
-                        w.getPronunciation(),
-                        w.getSpeechFields(),
-                        w.getMeaning())).toList();
+                        w.getSpelling(),
+                        w.getJpPronunciation(),
+                        w.getClassOfWord(),
+                        w.getMeaning().stream().map(Meaning::getMeaning).toList())).toList();
         if(list.isEmpty())
             return new SimilarQueryDto();
         else
