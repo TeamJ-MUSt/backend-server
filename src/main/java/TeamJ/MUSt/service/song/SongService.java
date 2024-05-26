@@ -32,16 +32,6 @@ public class SongService {
         return songRepository.findInMySong(memberId, title, artist);
     }
     public List<Song> searchDbSong(String title, String artist){
-        System.out.println("노래가 없어서 검색");
-        /*List<SongInfo> songInfo = PythonExecutor.callBugsApi(title, artist);
-        List<Song> searchedSongs = songInfo.stream().map(info -> new Song(
-                info.getTitle(),
-                info.getArtist().split("\\((.*?)\\)")[0],
-                info.getLyrics(),
-                imageToByte(info.getThumbnailUrl()),
-                Long.valueOf(info.getMusic_id())
-        )).toList();
-        songRepository.saveAll(searchedSongs);*/
         return songRepository.findRequestSong(title, artist);
     }
 

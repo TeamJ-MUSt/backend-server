@@ -4,6 +4,9 @@ import TeamJ.MUSt.domain.*;
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.service.song.SongInfo;
+import TeamJ.MUSt.util.BugsCrawler;
+import TeamJ.MUSt.util.WordExtractor;
+import TeamJ.MUSt.util.WordInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 //@Component
@@ -60,7 +62,7 @@ public class InitDb {
                     continue;
 
                 for (WordInfo wordInfo : wordInfos) {
-                    String spelling = wordInfo.getLemma();
+                    String spelling = wordInfo.getSurface();
                     Word findWord = wordRepository.findBySpelling(spelling);
 
                     if(findWord == null){
@@ -69,7 +71,7 @@ public class InitDb {
                                 .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();
                         List<Meaning> after = before.stream().map(Meaning::new).toList();
                         Word newWord = new Word(
-                                wordInfo.getLemma(),
+                                wordInfo.getSurface(),
                                 wordInfo.getPronunciation(),
                                 after,
                                 wordInfo.getSpeechFields());

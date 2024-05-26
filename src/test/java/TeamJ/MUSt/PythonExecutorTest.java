@@ -1,6 +1,7 @@
 package TeamJ.MUSt;
 
 import TeamJ.MUSt.service.song.SongInfo;
+import TeamJ.MUSt.util.BugsCrawler;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

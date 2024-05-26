@@ -1,18 +1,14 @@
 package TeamJ.MUSt;
 
-import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.domain.Song;
-import TeamJ.MUSt.repository.MemberRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
+import TeamJ.MUSt.util.WordExtractor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 @Getter
 public class WordDto {
+    private Long id;
     private String spell;
     private String enPro;
     private String japPro;
@@ -16,6 +17,7 @@ public class WordDto {
     private List<String> involvedSongs = new ArrayList<>();
 
     public WordDto(Word word) {
+        this.id = word.getId();
         this.spell = word.getSpelling();
         this.enPro = word.getEnPronunciation();
         this.japPro = word.getJpPronunciation();

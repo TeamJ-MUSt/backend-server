@@ -1,17 +1,21 @@
 package TeamJ.MUSt.service;
 
-import TeamJ.MUSt.controller.WordSearch;
 import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.domain.MemberWord;
 import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.repository.MemberRepository;
 import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.wordbook.MemberWordRepository;
+import TeamJ.MUSt.util.MeaningResult;
+import TeamJ.MUSt.util.NlpModule;
+import TeamJ.MUSt.util.WordExtractor;
+import TeamJ.MUSt.util.WordInfo;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +25,8 @@ public class MemberWordService {
     private final MemberWordRepository memberWordRepository;
     private final WordRepository wordRepository;
     private final MemberRepository memberRepository;
+    private final NlpModule module;
+    private final WordExtractor wordExtractor;
     private final EntityManager em;
     public List<Word> findUserWord(Long memberId){
 
@@ -46,5 +52,12 @@ public class MemberWordService {
             findMember.getMemberWords().add(memberWord);
         }
         return true;
+    }
+
+    public List<WordInfo> similarWords(Long wordId, Integer num) throws IOException {
+        Word word = wordRepository.findById(wordId).get();
+        System.out.println(word.getSpelling());
+        List<String> similarWords = module.getSimilarWord(word.getSpelling(), num);
+        return wordExtractor.getSimilarWords(similarWords);
     }
 }

@@ -3,10 +3,13 @@ package TeamJ.MUSt.controller;
 import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.repository.wordbook.MemberWordQueryDto;
 import TeamJ.MUSt.service.MemberWordService;
+import TeamJ.MUSt.util.WordInfo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -40,12 +43,57 @@ public class MemberWordController {
         boolean result = memberWordService.register(memberId, songId);
         return new UpdateResultDto(result);
     }
+
+    @GetMapping("/word-book/word/{wordId}/similar")
+    public SimilarQueryDto similarWord(@PathVariable("wordId") Long wordId, @RequestParam("num") Integer num) throws IOException {
+        List<WordInfo> similarWords = memberWordService.similarWords(wordId, num);
+        List<SimilarWordDto> list = similarWords.stream().map(w ->
+                new SimilarWordDto(
+                        w.getLemma(),
+                        w.getPronunciation(),
+                        w.getSpeechFields(),
+                        w.getMeaning())).toList();
+        if(list.isEmpty())
+            return new SimilarQueryDto();
+        else
+            return new SimilarQueryDto(true, list);
+    }
+
     @Getter
     static class UpdateResultDto {
         boolean success;
 
         public UpdateResultDto(boolean success) {
             this.success = success;
+        }
+    }
+
+    @Getter
+    static class SimilarWordDto{
+        private String spell;
+        private String japPro;
+        private String classOfWord;
+        private List<String> meaning;
+
+        public SimilarWordDto(String spell, String japPro, String classOfWord, List<String> meaning) {
+            this.spell = spell;
+            this.japPro = japPro;
+            this.classOfWord = classOfWord;
+            this.meaning = meaning;
+        }
+    }
+
+    @Getter
+    static class SimilarQueryDto{
+        private boolean success;
+        private List<SimilarWordDto> similarWordDtoList;
+
+        public SimilarQueryDto(boolean success, List<SimilarWordDto> similarWordDtoList) {
+            this.success = success;
+            this.similarWordDtoList = similarWordDtoList;
+        }
+
+        public SimilarQueryDto() {
         }
     }
 }

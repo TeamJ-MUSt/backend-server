@@ -7,6 +7,7 @@ import TeamJ.MUSt.repository.QuizRepository;
 import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
 import TeamJ.MUSt.repository.wordbook.MemberWordRepository;
+import TeamJ.MUSt.util.NlpModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 
 import static TeamJ.MUSt.domain.QuizType.*;
@@ -27,6 +29,7 @@ public class QuizService {
     private final MemberWordRepository wordBookRepository;
     private final WordRepository wordRepository;
     private final MeaningRepository meaningRepository;
+    private final NlpModule module;
 
     public List<Quiz> findQuizzes(Long songId, QuizType type, Integer pageNum){
         Page<Quiz> page = quizRepository.findBySongIdAndType(songId, type, PageRequest.of(pageNum, 20));
@@ -50,17 +53,25 @@ public class QuizService {
         }
     }
     @Transactional
-    public List<Quiz> createMeaningQuiz(Long songId){
+    public List<Quiz> createMeaningQuiz(Long songId) throws IOException {
         if (hasQuizAlready(songId, MEANING))
             return null;
 
         Song targetSong = songRepository.findById(songId).get();
         List<SongWord> songWords = targetSong.getSongWords();
         List<Quiz> createdQuiz = new ArrayList<>();
+
+        HashMap<String, Integer> freqTable = new HashMap<>();
+
+        for (SongWord songWord : songWords)
+            freqTable.put(songWord.getWord().getSpelling(), 0);
+
+
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
             List<Word> words = wordRepository.findByClassOfWord(targetWord.getClassOfWord());
             long count = words.size();
+            int order = freqTable.get(targetWord.getSpelling());
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
@@ -72,7 +83,11 @@ public class QuizService {
             Quiz newQuiz = new Quiz(targetSong, targetWord, MEANING, answerList, choiceList);
 
             createMeaningChoices(randomIds, choiceList, newQuiz, words);
-            createAnswer(answerList, targetWord, newQuiz, MEANING);
+
+            int usedMeaningIndex = module.reflectContext(new String(songWord.getSong().getLyric()), targetWord, order);
+            createMeaningAnswer(answerList, targetWord, newQuiz, usedMeaningIndex);
+            freqTable.merge(targetWord.getSpelling(), 1, Integer::sum);
+
             quizRepository.save(newQuiz);
             createdQuiz.add(newQuiz);
         }
@@ -88,8 +103,10 @@ public class QuizService {
         List<SongWord> songWords = targetSong.getSongWords();
         List<Quiz> createdQuiz = new ArrayList<>();
         List<Word> choiceWords = wordRepository.findWithoutHiragana();
+
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
+
             long count = choiceWords.size();
 
             long[] randomIds = new long[3];
@@ -102,7 +119,6 @@ public class QuizService {
 
             createReadingChoices(randomIds, choiceList, newQuiz, choiceWords);
             createAnswer(answerList, targetWord, newQuiz, READING);
-
             quizRepository.save(newQuiz);
             createdQuiz.add(newQuiz);
         }
@@ -122,7 +138,12 @@ public class QuizService {
         else if(type == READING)
             answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
     }
-
+    private static void createMeaningAnswer(List<Answer> answerList, Word targetWord, Quiz quiz, int order){
+        answerList.add(new Answer(targetWord.getMeaning().get(order).getMeaning(), quiz));
+    }
+    private static void createReadingAnswer(List<Answer> answerList, Word targetWord, Quiz quiz){
+        answerList.add(new Answer(targetWord.getJpPronunciation(), quiz));
+    }
     private void createReadingChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
         for (long randomId : randomIds) {
             Word selected = words.get((int) randomId);

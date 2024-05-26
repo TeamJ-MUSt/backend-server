@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 //예외처리
@@ -28,10 +29,10 @@ public class QuizController {
         return new SetNumDto(true, setNum);
     }
 
-    @GetMapping("/quiz/set")
+    @GetMapping("/quiz/{type}/set/{setNum}")
     public QuizResultDto quizzesSet(@RequestParam("songId") Long songId,
-                                 @RequestParam("type") QuizType type,
-                                 @RequestParam("pageNum") Integer pageNum) {
+                                    @PathVariable("type") QuizType type,
+                                    @PathVariable("setNum") Integer pageNum) {
         List<QuizDto> quizDtos = quizService.findQuizzes(songId, type, pageNum).stream()
                 .map(QuizDto::new).toList();
         if(quizDtos.isEmpty())
@@ -40,7 +41,7 @@ public class QuizController {
     }
 
     @PostMapping("/quiz/new")
-    public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type){
+    public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) throws IOException {
         List<Quiz> quizzes = new ArrayList<>();
         if(type == QuizType.MEANING)
             quizzes = quizService.createMeaningQuiz(songId);
