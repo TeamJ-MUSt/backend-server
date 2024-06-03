@@ -15,7 +15,7 @@ def get_word_definitions(words):
         result = searcher.search(word, 4)
         if (result['definitions'] is None) or (len(result['definitions']) == 0):
             log("Not found from dictionary, therefore skipping it.")
-            continue
+            result['definitions'] = ["empty"]
         else:
             log("Done!")
         results.append(result)

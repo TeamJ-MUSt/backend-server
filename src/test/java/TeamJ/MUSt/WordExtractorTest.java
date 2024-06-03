@@ -21,7 +21,7 @@ class WordExtractorTest {
 
     @Test
     public void 단어_추출() throws Exception{
-        List<WordInfo> wordInfos = wordExtractor.extractWords(songRepository.findById(1l).get());
+        List<WordInfo> wordInfos = wordExtractor.extractWords(songRepository.findById(2l).get());
         for (WordInfo wordInfo : wordInfos) {
             System.out.println(wordInfo);
         }

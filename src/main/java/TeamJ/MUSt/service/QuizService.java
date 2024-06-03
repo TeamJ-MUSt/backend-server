@@ -68,14 +68,16 @@ public class QuizService {
         HashMap<String, Integer> freqTable = new HashMap<>();
 
         for (SongWord songWord : songWords)
-            freqTable.put(songWord.getWord().getSpelling(), 0);
+            freqTable.put(songWord.getSurface(), 0);
 
 
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
+            String conjugation = songWord.getSurface();
+            System.out.println("conjugation = " + conjugation);
             List<Word> words = wordRepository.findByClassOfWord(targetWord.getClassOfWord());
             long count = words.size();
-            int order = freqTable.get(targetWord.getSpelling());
+            int order = freqTable.get(conjugation);
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
@@ -88,7 +90,7 @@ public class QuizService {
 
             createMeaningChoices(randomIds, choiceList, newQuiz, words);
 
-            int usedMeaningIndex = module.reflectContext(new String(songWord.getSong().getLyric()), targetWord, order);
+            int usedMeaningIndex = module.reflectContext(new String(songWord.getSong().getLyric()), targetWord, conjugation, order);
             createMeaningAnswer(answerList, targetWord, newQuiz, usedMeaningIndex);
             freqTable.merge(targetWord.getSpelling(), 1, Integer::sum);
 

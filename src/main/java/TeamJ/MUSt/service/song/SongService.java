@@ -69,6 +69,7 @@ public class SongService {
 
     @Transactional
     public String registerSong(Long userId, Long songId) throws NoSearchResultException {
+        long cacheHit = 0;
         long start = System.currentTimeMillis();
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
@@ -79,7 +80,6 @@ public class SongService {
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getSurface();
                 Word findWord = wordRepository.findBySpelling(spelling);
-
                 if(findWord == null){
                     List<String> before = wordInfo.getMeaning();
                     before = before.stream()

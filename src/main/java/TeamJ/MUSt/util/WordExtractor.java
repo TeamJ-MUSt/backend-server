@@ -45,7 +45,8 @@ public class WordExtractor {
             makeQuery(sb.toString().trim());
             List<MeaningResult> meaningResult = getMeaningResult();
 
-
+            System.out.println("추출된 단어 " + extractResult.size());
+            System.out.println("뜻 결과 수 " + meaningResult.size());
             for(int i = 0; i < meaningResult.size(); i++){
                 ParsingResult current = extractResult.get(i);
                 map.merge(meaningResult.get(i).getLevel(), 1, Integer::sum);

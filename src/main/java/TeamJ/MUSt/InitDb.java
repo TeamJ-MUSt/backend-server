@@ -65,8 +65,7 @@ public class InitDb {
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();
                     Word findWord = wordRepository.findBySpelling(spelling);
-
-                    if(findWord == null){
+                    if(findWord == null && !wordInfo.getMeaning().isEmpty()){
                         List<String> before = wordInfo.getMeaning();
                         before = before.stream()
                                 .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();

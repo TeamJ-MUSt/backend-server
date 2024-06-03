@@ -26,9 +26,9 @@ public class NlpModule {
     static String wordDbFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
     static String embeddingFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\embeddings";
 
-    public int reflectContext(String lyric, Word word, int order) throws IOException {
+    public int reflectContext(String lyric, Word word, String conjugation, int order) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        WordData wordData = new WordData(word.getSpelling(), word.getMeaning().stream().map(Meaning::getMeaning).toList());
+        WordData wordData = new WordData(conjugation, word.getMeaning().stream().map(Meaning::getMeaning).toList());
 
         String[] sentences = lyric.split("\n");
 
@@ -37,7 +37,7 @@ public class NlpModule {
             System.out.println("문제가 되는 녀석 : " + word.getSpelling());
         }
         for (String sentence : sentences) {
-            if(sentence.contains(word.getSpelling()))
+            if(sentence.contains(conjugation))
                 matchingSentences.add(sentence);
         }
         String targetSentence = matchingSentences.get(order);
