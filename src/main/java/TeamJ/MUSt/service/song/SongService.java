@@ -56,7 +56,7 @@ public class SongService {
                     lyrics = "";
                 else
                     lyrics = lyrics.substring(2, lyrics.length() - 2);
-                Song newSong = new Song(searchResult.getTitle(), searchResult.getArtist(), lyrics, BugsCrawler.imageToByte(searchResult.getThumbnailUrl()));
+                Song newSong = new Song(searchResult.getTitle(), searchResult.getArtist(), lyrics, BugsCrawler.imageToByte(searchResult.getThumbnailUrl_large()));
                 songRepository.save(newSong);
                 newSongs.add(newSong);
             }
@@ -86,7 +86,7 @@ public class SongService {
                             .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();
                     List<Meaning> after = before.stream().map(Meaning::new).toList();
                     Word newWord = new Word(
-                            wordInfo.getSurface(),
+                            wordInfo.getLemma(),
                             wordInfo.getPronunciation(),
                             after,
                             wordInfo.getSpeechFields());
@@ -95,7 +95,7 @@ public class SongService {
                         meaning.setWord(newWord);
                     }
                     SongWord songWord = new SongWord();
-                    songWord.createSongWord(newSong, newWord);
+                    songWord.createSongWord(newSong, newWord, wordInfo.getSurface());
                     newSong.getSongWords().add(songWord);
                 }
             }

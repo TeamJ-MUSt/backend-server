@@ -55,6 +55,7 @@ public class InitDb {
             songs[6] = createSampleSong("BETELGEUSE", "KSUKE");
             songs[7] = createSampleSong("Bling-Bang-Bang-Born", "Creepy Nuts");
 
+            long cacheHit = 0;
             for (Song song : songs){
                 em.persist(song);
                 List<WordInfo> wordInfos = wordExtractor.extractWords(song);
@@ -62,7 +63,7 @@ public class InitDb {
                     continue;
 
                 for (WordInfo wordInfo : wordInfos) {
-                    String spelling = wordInfo.getSurface();
+                    String spelling = wordInfo.getLemma();
                     Word findWord = wordRepository.findBySpelling(spelling);
 
                     if(findWord == null){
@@ -71,7 +72,7 @@ public class InitDb {
                                 .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();
                         List<Meaning> after = before.stream().map(Meaning::new).toList();
                         Word newWord = new Word(
-                                wordInfo.getSurface(),
+                                wordInfo.getLemma(),
                                 wordInfo.getPronunciation(),
                                 after,
                                 wordInfo.getSpeechFields());
@@ -80,9 +81,11 @@ public class InitDb {
                             meaning.setWord(newWord);
                         }
                         SongWord songWord = new SongWord();
-                        songWord.createSongWord(song, newWord);
+                        songWord.createSongWord(song, newWord, wordInfo.getSurface());
                         song.getSongWords().add(songWord);
                     }
+                    else
+                        cacheHit++;
                 }
             }
 
@@ -106,6 +109,7 @@ public class InitDb {
             for (Song song : searchedSongs)
                 em.persist(song);
 
+            System.out.println("cacheHit = " + cacheHit);
         }
     }
 
@@ -117,7 +121,7 @@ public class InitDb {
             lyrics = "";
         else
             lyrics = lyrics.substring(2, lyrics.length() - 2);
-        return new Song(title, artist, lyrics, imageToByte(firstSong.getThumbnailUrl()));
+        return new Song(title, artist, lyrics, imageToByte(firstSong.getThumbnailUrl_large()));
     }
 
     public static byte[] imageToByte(String imageURL){

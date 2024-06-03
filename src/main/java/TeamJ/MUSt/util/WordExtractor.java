@@ -58,10 +58,10 @@ public class WordExtractor {
                 WordInfo wordInfo = new WordInfo(
                         current.getSurface(),
                         current.getSpeechFields().get(0),
-                        current.getPronunciation(),
                         current.getLemma().split("-")[0]);
                 if(meaningResult.get(i).getDefinitions() != null) {
                     wordInfo.setMeaning(meaningResult.get(i).getDefinitions());
+                    wordInfo.setPronunciation(meaningResult.get(i).getPronounciation());
                     wordsList.add(wordInfo);
                 }
             }
@@ -136,7 +136,6 @@ public class WordExtractor {
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
         str = str.replaceAll("\'", "\"");
-        System.out.println("str = " + str);
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(str, new TypeReference<List<ParsingResult>>(){});
     }
@@ -154,7 +153,6 @@ public class WordExtractor {
         String[] jsonItems = str.split("},\\s*\\{");
         ObjectMapper mapper = new ObjectMapper();
         for (String item : jsonItems) {
-
             item = "{" + item + "}";
             try {
                 MeaningResult result = mapper.readValue(item, MeaningResult.class);
@@ -183,7 +181,6 @@ public class WordExtractor {
     static class ParsingResult{
         private String surface;
         private List<String> speechFields;
-        private String pronunciation;
         private String lemma;
         public ParsingResult() {
         }

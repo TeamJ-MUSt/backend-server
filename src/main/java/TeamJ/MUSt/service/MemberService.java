@@ -13,4 +13,9 @@ public class MemberService {
         memberRepository.save(member);
         return member.getId();
     }
+
+    public boolean firstAuth(String id, String password){
+        //return memberRepository.findByUsernameAndPassword(id, password);
+        return true;
+    }
 }

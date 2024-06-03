@@ -13,13 +13,14 @@ public class SongInfo{
     private String artist;
     private String thumbnailUrl;
     private String lyrics;
-
-    public SongInfo(String musicId, String title, String artist, String thumbnailUrl, String lyrics) {
+    private String thumbnailUrl_large;
+    public SongInfo(String musicId, String title, String artist, String thumbnailUrl, String lyrics, String thumbnailUrl_large) {
         this.music_id = musicId;
         this.title = title;
         this.artist = artist;
         this.thumbnailUrl = thumbnailUrl;
         this.lyrics = lyrics;
+        this.thumbnailUrl_large = thumbnailUrl_large;
     }
 
     public SongInfo() {

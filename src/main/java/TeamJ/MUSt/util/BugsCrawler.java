@@ -56,7 +56,6 @@ public class BugsCrawler {
 
     private static List<SongInfo> getSearchResult(Process p) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-
         String str = "";
         str = br.readLine();
 

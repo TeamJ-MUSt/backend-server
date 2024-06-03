@@ -18,10 +18,12 @@ public class SongWord {
     @JoinColumn(name = "word_id")
     private Word word;
 
-    public void createSongWord(Song song, Word word){
+    private String surface;
+    public void createSongWord(Song song, Word word, String surface){
         song.getSongWords().add(this);
         word.getSongWords().add(this);
         this.song = song;
         this.word = word;
+        this.surface = surface;
     }
 }

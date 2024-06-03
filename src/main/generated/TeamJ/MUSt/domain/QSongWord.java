@@ -26,6 +26,8 @@ public class QSongWord extends EntityPathBase<SongWord> {
 
     public final QSong song;
 
+    public final StringPath surface = createString("surface");
+
     public final QWord word;
 
     public QSongWord(String variable) {
