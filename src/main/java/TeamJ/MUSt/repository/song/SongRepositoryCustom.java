@@ -16,4 +16,6 @@ public interface SongRepositoryCustom {
     int countSearchResult(String title, String artist);
     List<Song> findWithMemberSong(Long memberId);
     List<Song> findWithMemberSong(Long memberId, Pageable pageable);
+
+    List<Tuple> findWithMemberSongCheckingRegister(Long memberId, String title, String artist);
 }

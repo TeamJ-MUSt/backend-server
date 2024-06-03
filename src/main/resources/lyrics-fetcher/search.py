@@ -2,11 +2,12 @@ import argparse
 import json
 import os
 import sys
+
 from src import bugs
 from src import utils
 
 sys.stdout.reconfigure(encoding='utf-8')
-bugs.max_delay = 0
+bugs.max_delay = 3
 
 def is_file(string):
     _, file_extension = os.path.splitext(string)

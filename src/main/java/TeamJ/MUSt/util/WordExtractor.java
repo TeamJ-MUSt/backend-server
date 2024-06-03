@@ -24,6 +24,7 @@ public class WordExtractor {
     private final SongRepository songRepository;
     public List<WordInfo> extractWords(Song newSong) {
         if(newSong.getLyric() == null || newSong.getLyric().length == 0){
+            System.out.println("이 노래는 가사가 없다");
             newSong.setLevel(0);
             return null;
         }
@@ -135,6 +136,7 @@ public class WordExtractor {
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
         str = str.replaceAll("\'", "\"");
+        System.out.println("str = " + str);
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(str, new TypeReference<List<ParsingResult>>(){});
     }

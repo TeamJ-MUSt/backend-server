@@ -15,8 +15,7 @@ def get_word_definitions(words):
         result = searcher.search(word, 4)
         if (result['definitions'] is None) or (len(result['definitions']) == 0):
             log("Not found from dictionary, therefore skipping it.")
-            result['definitions'] = ["empty"]
-            #continue
+            continue
         else:
             log("Done!")
         results.append(result)
@@ -41,18 +40,17 @@ def main():
         if args.verbose:
             print("Error: Please provide words using --query")
         return
-    
+
     global verbose
     verbose = args.verbose
-    
+
     if is_file(args.query):
         with open(args.query, 'r', encoding='UTF-8') as file:
             text = file.read()
     else:
         text = args.query
-    
-    dictionary = get_word_definitions(text.split(' '))
 
+    dictionary = get_word_definitions(text.split(' '))
     if not args.out:
         print(dictionary)
     else:

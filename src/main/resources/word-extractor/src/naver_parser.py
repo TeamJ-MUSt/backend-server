@@ -61,7 +61,7 @@ def search_definitions_and_level(driver, query, N):
             # Scroll down to the bottom
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             # Wait to load more items
-            time.sleep(0.4)
+            time.sleep(0.5)
 
             # Attempt to find the container rows that include the origin and definitions
             rows = driver.find_elements(By.CSS_SELECTOR, "div.row")

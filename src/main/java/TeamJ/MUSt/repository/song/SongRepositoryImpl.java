@@ -1,7 +1,10 @@
 package TeamJ.MUSt.repository.song;
 
 import TeamJ.MUSt.domain.*;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +43,24 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+    @Override
+    public List<Tuple> findWithMemberSongCheckingRegister(Long memberId, String title, String artist) {
+        return queryFactory
+                .selectDistinct(
+                        song,
+                        song.in(
+                                JPAExpressions
+                                        .select(memberSong.song)
+                                        .from(memberSong)
+                                        .where(memberSong.member.id.eq(memberId))
+                        )
+                )
+                .from(song)
+                .where(titleEq(title), artistEq(artist))
+                .fetch();
+    }
+
     @Override
     public List<Word> findUsedWords(Long songId) {
         return queryFactory
@@ -59,6 +80,8 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
                 .where(memberSong.member.id.eq(memberId), titleEq(title), artistEq(artist))
                 .fetch();
     }
+
+
 
     @Override
     public List<Song> findRequestSong(String title, String artist) {

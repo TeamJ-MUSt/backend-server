@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,28 @@ public class BugsCrawler {
             System.out.println(e.getMessage());
         }
     }
+    public static byte[] imageToByte(String imageURL){
+        byte[] imageBytes = null;
+        try {
+            URL url = new URL(imageURL);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            InputStream stream = url.openStream();
+
+            while ((bytesRead = stream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            imageBytes = outputStream.toByteArray();
+
+            stream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return imageBytes;
+    }
 
 }

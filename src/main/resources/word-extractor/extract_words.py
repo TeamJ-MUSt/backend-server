@@ -14,8 +14,14 @@ sys.stdout.reconfigure(encoding='utf-8')
 def get_important_tokens(text):
     tokens = tokenizer.get_tokens(text)
     important_tokens = []
+    banned_fields = ['助詞', '助動詞', '数詞']
     for token in tokens:
-        if token["speechFields"][0] == '助詞':
+        ban = False
+        for field in token['speechFields']:
+            if field in banned_fields:
+                ban = True
+                break
+        if ban:
             continue
         important_tokens.append(token)
     return important_tokens
@@ -35,19 +41,21 @@ def main():
     parser.add_argument('--out', help='Output file path. Outputs to standard output if not specified.')
     parser.add_argument('--verbose', action='store_true', help='Prints current queries and progress')
     args = parser.parse_args()
+
     if not args.query:
         if args.verbose:
             print("Error: Please provide text using --query")
         return
-    
+
     global verbose
     verbose = args.verbose
+
     if is_file(args.query):
         with open(args.query, 'r', encoding='UTF-8') as file:
             text = file.read()
     else:
         text = args.query
-    
+
     tokens = get_important_tokens(text)
 
     if not args.out:
