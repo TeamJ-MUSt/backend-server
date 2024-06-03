@@ -148,6 +148,8 @@ public class QuizService {
                     .map(s -> s.replace("\\u200b", "").replace("\\u3000b", ""))
                     .toArray(String[]::new);
             System.out.println("segments = " + Arrays.toString(segments));
+            if(segments.length > 6 || segments.length < 2)
+                continue;
             List<Choice> choiceList = new ArrayList<>();
             List<Answer> answerList = new ArrayList<>();
             Quiz newQuiz = new Quiz(targetSong, null, SENTENCE, answerList, choiceList);
@@ -200,18 +202,6 @@ public class QuizService {
     }
 
     private static void createRandomIds(long count, long[] randomIds) {
-        /*Random random = new Random();
-        random.setSeed(System.currentTimeMillis());
-        for(int i = 0; i < 3; i++){
-            long num = random.nextLong(count);
-            for(int j = 0; j < i; j++){
-                if(randomIds[j] == num){
-                    i--;
-                    break;
-                }
-            }
-            randomIds[i] = num;
-        }*/
         Set<Long> uniqueIds = new HashSet<>();
         while (uniqueIds.size() < randomIds.length) {
             long num = random.nextLong(count);

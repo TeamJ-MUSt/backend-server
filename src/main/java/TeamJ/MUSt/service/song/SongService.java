@@ -80,10 +80,14 @@ public class SongService {
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getSurface();
                 Word findWord = wordRepository.findBySpelling(spelling);
-                if(findWord == null){
+                if(findWord == null && !wordInfo.getMeaning().isEmpty()){
                     List<String> before = wordInfo.getMeaning();
                     before = before.stream()
-                            .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s).toList();
+                            .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s)
+                            .filter(s -> !s.isEmpty() && s.chars().allMatch(ch -> ch < '\u4E00' || ch > '\u9FFF'))
+                            .toList();
+                    if(before.isEmpty())
+                        continue;
                     List<Meaning> after = before.stream().map(Meaning::new).toList();
                     Word newWord = new Word(
                             wordInfo.getLemma(),
