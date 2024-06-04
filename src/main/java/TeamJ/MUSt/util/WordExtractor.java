@@ -24,7 +24,6 @@ public class WordExtractor {
     private final SongRepository songRepository;
     public List<WordInfo> extractWords(Song newSong) {
         if(newSong.getLyric() == null || newSong.getLyric().length == 0){
-            System.out.println("이 노래는 가사가 없다");
             newSong.setLevel(0);
             return null;
         }
@@ -45,8 +44,6 @@ public class WordExtractor {
             makeQuery(sb.toString().trim());
             List<MeaningResult> meaningResult = getMeaningResult();
 
-            System.out.println("추출된 단어 " + extractResult.size());
-            System.out.println("뜻 결과 수 " + meaningResult.size());
             for(int i = 0; i < meaningResult.size(); i++){
                 ParsingResult current = extractResult.get(i);
                 map.merge(meaningResult.get(i).getLevel(), 1, Integer::sum);
@@ -66,7 +63,6 @@ public class WordExtractor {
                     wordsList.add(wordInfo);
                 }
             }
-            System.out.println(map);
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
@@ -87,40 +83,6 @@ public class WordExtractor {
             newSong.setLevel(level);
         }
         return wordsList;
-    }
-
-    public List<WordInfo> getSimilarWords(List<String> similarWords) {
-        /*System.out.println("처음에 주어진 단어의 수 : " + similarWords.size());
-        List<WordInfo> wordsList = new ArrayList<>();
-        try{
-            String query = "";
-            for (String similarWord : similarWords)
-                query = query.concat(similarWord + " ");
-            System.out.println("query = " + query);
-            makeQuery(query.replaceAll("^\\s+|\\s+$", ""));
-            List<ParsingResult> extractResult = getExtractResult();
-            List<MeaningResult> meaningResult = getMeaningResult();
-
-            for(int i = 0; i < meaningResult.size(); i++){
-                ParsingResult current = extractResult.get(i);
-                if(current.getSurface().equals("\\"))
-                    continue;
-
-                WordInfo wordInfo = new WordInfo(
-                        current.getSurface(),
-                        current.getSpeechFields().get(0),
-                        current.getPronunciation(),
-                        current.getLemma().split("-")[0]);
-                if(meaningResult.get(i).getDefinitions() != null) {
-                    wordInfo.setMeaning(meaningResult.get(i).getDefinitions());
-                    wordsList.add(wordInfo);
-                }
-            }
-        }catch (IOException e){
-            System.out.println(e.getMessage());
-        }
-        return wordsList;*/
-        return null;
     }
 
     public void makeQuery(String lyrics) {
@@ -169,7 +131,6 @@ public class WordExtractor {
                                 .toList());
                 results.add(result);
             } catch (Exception e) {
-                System.out.println("문제 있는 녀석 " + item);
                 System.out.println(e.getMessage());
                 results.add(new MeaningResult());
             }

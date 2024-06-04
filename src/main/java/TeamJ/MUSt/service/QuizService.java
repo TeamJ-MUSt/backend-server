@@ -74,7 +74,6 @@ public class QuizService {
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
             String conjugation = songWord.getSurface();
-            System.out.println("conjugation = " + conjugation);
             List<Word> words = wordRepository.findByClassOfWord(targetWord.getClassOfWord());
             long count = words.size();
             int order = freqTable.get(conjugation);
@@ -117,7 +116,6 @@ public class QuizService {
 
             long[] randomIds = new long[3];
             createRandomIds(count, randomIds);
-            System.out.println("이번에 고를 랜덤 : " + Arrays.toString(randomIds));
             List<Choice> choiceList = new ArrayList<>();
             List<Answer> answerList = new ArrayList<>();
 
@@ -147,7 +145,6 @@ public class QuizService {
                     .filter(s -> !(s.equals("\\u200b") || s.equals("\\u3000b")))
                     .map(s -> s.replace("\\u200b", "").replace("\\u3000b", ""))
                     .toArray(String[]::new);
-            System.out.println("segments = " + Arrays.toString(segments));
             if(segments.length > 6 || segments.length < 2)
                 continue;
             List<Choice> choiceList = new ArrayList<>();
@@ -185,9 +182,6 @@ public class QuizService {
     private void createMeaningChoices(long[] randomIds, List<Choice> choiceList, Quiz quiz, List<Word> words) {
         for (long randomId : randomIds) {
             Meaning findMeaning = words.get((int) randomId).getMeaning().get(0);
-            if(findMeaning == null){
-                System.out.println("찾으려 시도한 단어 id" + randomId);
-            }
             Choice choice = new Choice(findMeaning.getMeaning().trim(), quiz);
             choiceList.add(choice);
         }

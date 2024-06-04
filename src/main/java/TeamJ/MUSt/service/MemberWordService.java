@@ -57,7 +57,6 @@ public class MemberWordService {
 
     public List<Word> similarWords(Long wordId, Integer num) throws IOException {
         Word word = wordRepository.findById(wordId).get();
-        System.out.println(word.getSpelling());
         List<String> similarWords = module.getSimilarWord(word.getSpelling(), num);
         List<Word> result = new ArrayList<>();
         for (String similarWord : similarWords) {

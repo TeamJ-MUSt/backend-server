@@ -1,11 +1,13 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 import argparse
 import json
 import os
 
 import src.daum_parser as parser
 import src.fugashi_tokenizer as tokenizer
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
+
 verbose = False
 
 parser.set_max_delay(2)

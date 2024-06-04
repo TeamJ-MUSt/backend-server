@@ -1,6 +1,7 @@
 package TeamJ.MUSt.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class Member {
     private Long id;
 
     @Column(name = "name")
+    @NotEmpty
     private String username;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -22,8 +24,12 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     List<MemberWord> memberWords = new ArrayList<>();
-    public Member(String username) {
+
+    @NotEmpty
+    private String password;
+    public Member(String username, String password) {
         this.username = username;
+        this.password = password;
     }
 
     public Member() {

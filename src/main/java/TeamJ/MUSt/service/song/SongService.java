@@ -49,7 +49,6 @@ public class SongService {
         List<Song> newSongs = new ArrayList<>();
         try{
             List<SongInfo> searchResults = BugsCrawler.callBugsApi(title, artist);
-            System.out.println("searchResults.size() = " + searchResults.size());
             for (SongInfo searchResult : searchResults) {
                 String lyrics = searchResult.getLyrics();
                 if(lyrics.length() == 4)
@@ -73,10 +72,8 @@ public class SongService {
         long start = System.currentTimeMillis();
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
-        System.out.println("이 노래의 단어 수 = " + newSong.getSongWords().size());
         if(newSong.getSongWords().isEmpty()){
             List<WordInfo> wordInfos = wordExtractor.extractWords(newSong);
-            System.out.println("추출된 단어 수 = " + wordInfos.size());
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getSurface();
                 Word findWord = wordRepository.findBySpelling(spelling);
@@ -101,13 +98,19 @@ public class SongService {
                     SongWord songWord = new SongWord();
                     songWord.createSongWord(newSong, newWord, wordInfo.getSurface());
                     newSong.getSongWords().add(songWord);
+                }else{
+                    if(findWord != null){
+                        cacheHit++;
+                        SongWord songWord = new SongWord();
+                        songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
+                        newSong.getSongWords().add(songWord);
+                    }
                 }
             }
         }
         MemberSong memberSong = new MemberSong();
         memberSong.createMemberSong(member, newSong);
         long end = System.currentTimeMillis();
-        System.out.println("걸리는 시간 : " + (end - start) / 1000);
         return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
     }
 }

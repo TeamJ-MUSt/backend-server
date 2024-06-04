@@ -50,7 +50,5 @@ class MemberWordServiceTest {
 
     @Test
     public void 비슷한_단어() throws Exception{
-        //List<WordInfo> wordInfos = memberWordService.similarWords(1l, 3);
-        //System.out.println(wordInfos);
     }
 }

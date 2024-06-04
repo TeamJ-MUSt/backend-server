@@ -67,7 +67,6 @@ public class BugsCrawler {
 
     private static String getLyrics(Process p) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
-
         String str = "";
         str = br.readLine();
         return str;

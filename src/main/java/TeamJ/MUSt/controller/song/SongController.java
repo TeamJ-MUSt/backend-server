@@ -1,15 +1,14 @@
 package TeamJ.MUSt.controller.song;
 
+import TeamJ.MUSt.controller.WordDto;
 import TeamJ.MUSt.controller.song.dto.*;
 import TeamJ.MUSt.domain.Song;
+import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.exception.NoSearchResultException;
-import TeamJ.MUSt.repository.QuizRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
-import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.service.song.SongService;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +20,7 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
     private final SongRepository songRepository;
+
     @GetMapping(value = "/main/songs/{memberId}")
     public HomeDto songs(@PathVariable("memberId") Long memberId){
         List<Song> userSong = songService.findUserSong(memberId);
@@ -35,50 +35,12 @@ public class SongController {
         return new HomeDto(list, 5, 5);
 
     }
-
-    @GetMapping("/{memberId}/search")
-    public SearchResultDto searchOwnSong(@PathVariable("memberId") Long memberId, @ModelAttribute SongSearch songSearch){
-        String title = songSearch.getTitle();
-        String artist = songSearch.getArtist();
-        List<Song> searchedSong = null;
-        searchedSong = songService.searchMySong(memberId, title, artist);
-
-        if(searchedSong.isEmpty())
-            return new SearchResultDto(null, false);
-
-        return new SearchResultDto(
-                searchedSong.stream().map(song -> new SongDto(
-                        song.getId(),
-                        song.getTitle(),
-                        song.getArtist(),
-                        new String(song.getLyric()),
-                        song.getLevel()
-                        )).toList(),
-                true);
+    @GetMapping("/song/words")
+    public List<WordDto> usedWords(@RequestParam("songId") Long songId){
+        List<Word> wordsInSong = songRepository.findWithSongWord(songId);
+        return wordsInSong.stream().map(WordDto::new).toList();
     }
-
-    @GetMapping("/search")
-    public SearchResultDto searchInDb(@ModelAttribute SongSearch songSearch){
-        String title = songSearch.getTitle();
-        String artist = songSearch.getArtist();
-        List<Song> searchedSong = null;
-        searchedSong = songService.searchDbSong(title, artist);
-
-        if(searchedSong.isEmpty())
-            return new SearchResultDto(null, false);
-
-        return new SearchResultDto(
-                searchedSong.stream().map(song -> new SongDto(
-                        song.getId(),
-                        song.getTitle(),
-                        song.getArtist(),
-                        new String(song.getLyric()),
-                        song.getLevel()
-                        )).toList(),
-                true);
-    }
-
-    @GetMapping("/song/searchV2")
+    @GetMapping("/song/search")
     public SearchResultDtoV2 searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId){
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();

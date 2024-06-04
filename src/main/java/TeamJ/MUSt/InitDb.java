@@ -39,8 +39,8 @@ public class InitDb {
         private final WordRepository wordRepository;
         public void initDb() throws IOException, NoSearchResultException {
             Member[] members = new Member[2];
-            members[0] = new Member("member1");
-            members[1] = new Member("member2");
+            members[0] = new Member("member1", "0");
+            members[1] = new Member("member2", "0");
 
             for (Member member : members)
                 em.persist(member);
@@ -87,8 +87,14 @@ public class InitDb {
                         songWord.createSongWord(song, newWord, wordInfo.getSurface());
                         song.getSongWords().add(songWord);
                     }
-                    else
-                        cacheHit++;
+                    else{
+                        if(findWord != null){
+                            cacheHit++;
+                            SongWord songWord = new SongWord();
+                            songWord.createSongWord(song, findWord, wordInfo.getSurface());
+                            song.getSongWords().add(songWord);
+                        }
+                    }
                 }
             }
 
@@ -111,8 +117,6 @@ public class InitDb {
             }).toList();
             for (Song song : searchedSongs)
                 em.persist(song);
-
-            System.out.println("cacheHit = " + cacheHit);
         }
     }
 

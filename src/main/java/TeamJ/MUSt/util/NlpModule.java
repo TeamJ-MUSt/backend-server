@@ -33,9 +33,6 @@ public class NlpModule {
         String[] sentences = lyric.split("\n");
 
         ArrayList<String> matchingSentences = new ArrayList<>();
-        if(matchingSentences.size() == 0){
-            System.out.println("문제가 되는 녀석 : " + word.getSpelling());
-        }
         for (String sentence : sentences) {
             if(sentence.contains(conjugation))
                 matchingSentences.add(sentence);
@@ -44,13 +41,11 @@ public class NlpModule {
         String query = targetSentence + "@" + mapper.writeValueAsString(wordData);
 
         query = query.replace('\"', '#');
-        System.out.println(query);
         ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, query);
         Process extractProcess = contextProcessBuilder.start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
-        System.out.println(targetSentence + "에서 " + word.getSpelling() + "의 뜻은 " + word.getMeaning().get(Integer.parseInt(str.substring(1, 2))));
         return Integer.parseInt(str.substring(1, 2));
     }
 
@@ -61,7 +56,6 @@ public class NlpModule {
         try{
            BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
            String str = br.readLine().replaceAll("'", "\"");
-           System.out.println("str = " + str);
            ObjectMapper mapper = new ObjectMapper();
            wordData = mapper.readValue(str, new TypeReference<List<SimilarWord>>() {});
        }catch (Exception e){

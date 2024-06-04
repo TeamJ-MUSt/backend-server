@@ -5,13 +5,13 @@ import requests
 
 from bs4 import BeautifulSoup as Soup
 
-max_delay = 0
+max_delay = 5
 verbose = False
 
 
 def set_max_delay(delay : float):
     if delay < 1:
-        delay = 0
+        delay = 1
     max_delay = delay
 
 def search_results(search_keyword : str):
@@ -49,9 +49,9 @@ def __extract_bugsmusic_listen_parameter(input_string: str):
         return parameter
     else:
         return None
-
+    
 def __find_music_info_from_search_result(url: str):
-
+    
     results = []
     try:
         response = requests.get(url)
@@ -62,14 +62,14 @@ def __find_music_info_from_search_result(url: str):
                 result = {"music_id":"", "title":"", "artist":"", "thumbnailUrl":""}
                 th_element = song_tr_element.find('th', scope='row')
                 thumbnail_a_element = song_tr_element.find('a', class_='thumbnail')
-
+                
                 #thumbnail
                 if thumbnail_a_element:
                     img_tag = thumbnail_a_element.find('img')
                     if img_tag:
                         result["thumbnailUrl"] = img_tag.get('src')
                         result["thumbnailUrl_large"] = img_tag.get('src').replace('/50/','/200/')
-                if th_element:
+                if th_element:  
                     p_tag = th_element.find('p')
                     if p_tag:
                         a_tag = p_tag.find('a')
