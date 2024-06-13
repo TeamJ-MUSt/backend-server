@@ -35,6 +35,8 @@ public class WordExtractor {
 
         int levelCount = 0;
         HashMap<Integer, Integer> map = new HashMap<>();
+        for(int i = 1; i <= 5; i++)
+            map.put(i, 0);
         try{
             List<ParsingResult> extractResult = getExtractResult();
             StringBuilder sb = new StringBuilder();
@@ -104,14 +106,17 @@ public class WordExtractor {
     }
 
     public List<MeaningResult> getMeaningResult() throws IOException{
+        long start = System.currentTimeMillis();
         List<MeaningResult> results = new ArrayList<>();
-        ProcessBuilder meaningProcessBuilder = new ProcessBuilder("python", meaningScript, queryFile);
+        ProcessBuilder meaningProcessBuilder = new ProcessBuilder("python", meaningScript, queryFile, "--threads=4");
         Process meaningProcess = meaningProcessBuilder.start();
         BufferedReader br = new BufferedReader(new InputStreamReader(meaningProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
         if(str == null)
             return null;
         str = str.replaceAll("'(\\w+)':", "\"$1\":").replaceAll("'(.*?)'", "\"$1\"");
+        if(str.length() <= 2)
+            return results;
         str = str.substring(2, str.length() - 2);
         String[] jsonItems = str.split("},\\s*\\{");
         ObjectMapper mapper = new ObjectMapper();
@@ -135,6 +140,7 @@ public class WordExtractor {
                 results.add(new MeaningResult());
             }
         }
+        long end = System.currentTimeMillis();
         return results;
     }
     @Getter

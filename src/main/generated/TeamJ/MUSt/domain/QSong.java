@@ -22,6 +22,8 @@ public class QSong extends EntityPathBase<Song> {
 
     public final StringPath artist = createString("artist");
 
+    public final StringPath bugsId = createString("bugsId");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Integer> level = createNumber("level", Integer.class);
@@ -29,6 +31,8 @@ public class QSong extends EntityPathBase<Song> {
     public final ArrayPath<char[], Character> lyric = createArray("lyric", char[].class);
 
     public final ListPath<MemberSong, QMemberSong> memberSongs = this.<MemberSong, QMemberSong>createList("memberSongs", MemberSong.class, QMemberSong.class, PathInits.DIRECT2);
+
+    public final ArrayPath<byte[], Byte> smallThumbnail = createArray("smallThumbnail", byte[].class);
 
     public final ListPath<SongWord, QSongWord> songWords = this.<SongWord, QSongWord>createList("songWords", SongWord.class, QSongWord.class, PathInits.DIRECT2);
 

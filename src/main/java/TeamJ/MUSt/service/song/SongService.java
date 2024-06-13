@@ -5,6 +5,7 @@ import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.MemberRepository;
 import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.song.SongRepository;
+import TeamJ.MUSt.service.QuizService;
 import TeamJ.MUSt.util.BugsCrawler;
 import TeamJ.MUSt.util.WordExtractor;
 import TeamJ.MUSt.util.WordInfo;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,8 @@ public class SongService {
     private final MemberRepository memberRepository;
     private final WordExtractor wordExtractor;
     private final WordRepository wordRepository;
+    private final QuizService quizService;
+
     public List<Song> findUserSong(Long memberId) {
         return songRepository.findWithMemberSong(memberId);
     }
@@ -33,57 +37,69 @@ public class SongService {
     public List<Song> findUserSong(Long memberId, Pageable pageRequest) {
         return songRepository.findWithMemberSong(memberId, pageRequest);
     }
-    public List<Song> searchMySong(Long memberId, String title, String artist){
+
+    public List<Song> searchMySong(Long memberId, String title, String artist) {
         return songRepository.findInMySong(memberId, title, artist);
     }
-    public List<Song> searchDbSong(String title, String artist){
+
+    public List<Song> searchDbSong(String title, String artist) {
         return songRepository.findRequestSong(title, artist);
     }
 
-    public List<Tuple> searchSong(Long memberId, String title, String artist){
+    public List<Tuple> searchSong(Long memberId, String title, String artist) {
         return songRepository.findWithMemberSongCheckingRegister(memberId, title, artist);
     }
 
     @Transactional
     public List<Song> searchRemoteSong(String title, String artist) {
         List<Song> newSongs = new ArrayList<>();
-        try{
+        try {
             List<SongInfo> searchResults = BugsCrawler.callBugsApi(title, artist);
             for (SongInfo searchResult : searchResults) {
-                String lyrics = searchResult.getLyrics();
-                if(lyrics.length() == 4)
-                    lyrics = "";
-                else
-                    lyrics = lyrics.substring(2, lyrics.length() - 2);
-                Song newSong = new Song(searchResult.getTitle(), searchResult.getArtist(), lyrics, BugsCrawler.imageToByte(searchResult.getThumbnailUrl_large()));
-                songRepository.save(newSong);
-                newSongs.add(newSong);
+                if (songRepository.findRequestSong(searchResult.getTitle(), searchResult.getArtist()).isEmpty()) {
+                    Song newSong = new Song(searchResult.getTitle(),
+                            searchResult.getArtist().replaceAll("\\(.*?\\)", ""),
+                            BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
+                            BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
+                            searchResult.getMusic_id());
+
+                    songRepository.save(newSong);
+                    newSongs.add(newSong);
+                }
             }
 
-        }catch (NoSearchResultException e){
+        } catch (NoSearchResultException e) {
             return null;
         }
         return newSongs;
     }
 
     @Transactional
-    public String registerSong(Long userId, Long songId) throws NoSearchResultException {
-        long cacheHit = 0;
-        long start = System.currentTimeMillis();
+    public String registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
-        if(newSong.getSongWords().isEmpty()){
+        String lyric = BugsCrawler.getLyrics(bugsId);
+        if (lyric.length() == 4)
+            lyric = "";
+        else {
+            lyric = lyric.substring(0, lyric.length() - 2);
+            lyric = lyric.substring(2);
+        }
+        newSong.setLyric(lyric.toCharArray());
+        if (newSong.getSongWords().isEmpty()) {
             List<WordInfo> wordInfos = wordExtractor.extractWords(newSong);
+            if (wordInfos.isEmpty())
+                return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
             for (WordInfo wordInfo : wordInfos) {
-                String spelling = wordInfo.getSurface();
+                String spelling = wordInfo.getLemma();
                 Word findWord = wordRepository.findBySpelling(spelling);
-                if(findWord == null && !wordInfo.getMeaning().isEmpty()){
+                if (findWord == null && !wordInfo.getMeaning().isEmpty()) {
                     List<String> before = wordInfo.getMeaning();
                     before = before.stream()
                             .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s)
                             .filter(s -> !s.isEmpty() && s.chars().allMatch(ch -> ch < '\u4E00' || ch > '\u9FFF'))
                             .toList();
-                    if(before.isEmpty())
+                    if (before.isEmpty())
                         continue;
                     List<Meaning> after = before.stream().map(Meaning::new).toList();
                     Word newWord = new Word(
@@ -98,9 +114,8 @@ public class SongService {
                     SongWord songWord = new SongWord();
                     songWord.createSongWord(newSong, newWord, wordInfo.getSurface());
                     newSong.getSongWords().add(songWord);
-                }else{
-                    if(findWord != null){
-                        cacheHit++;
+                } else {
+                    if (findWord != null) {
                         SongWord songWord = new SongWord();
                         songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
                         newSong.getSongWords().add(songWord);
@@ -110,7 +125,6 @@ public class SongService {
         }
         MemberSong memberSong = new MemberSong();
         memberSong.createMemberSong(member, newSong);
-        long end = System.currentTimeMillis();
         return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
     }
 }

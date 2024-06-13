@@ -91,7 +91,7 @@ class SongServiceTest {
     @Test
     public void 노래_등록() throws Exception{
         List<Song> before = songService.findUserSong(1l);
-        songService.registerSong(1l, 12l);
+        songService.registerSong(1l, 12l, null);
         List<Song> after = songService.findUserSong(1l);
         assertThat(after.size() - before.size()).isEqualTo(1);
     }

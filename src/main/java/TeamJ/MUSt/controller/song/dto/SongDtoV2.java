@@ -10,15 +10,16 @@ public class SongDtoV2 {
     String artist;
     String lyrics;
     Integer level;
+    String bugsId;
 
     boolean hasSong;
     public SongDtoV2(Song song, boolean hasSong) {
         this.songId = song.getId();
         this.title = song.getTitle();
         this.artist = song.getArtist();
-        this.lyrics = new String(song.getLyric());
         this.level = song.getLevel();
         this.hasSong = hasSong;
+        this.bugsId = song.getBugsId();
     }
 
     public SongDtoV2() {

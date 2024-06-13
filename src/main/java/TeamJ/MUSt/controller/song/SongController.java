@@ -6,12 +6,17 @@ import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.song.SongRepository;
+import TeamJ.MUSt.service.QuizService;
+import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.service.song.SongService;
+import TeamJ.MUSt.util.BugsCrawler;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,9 +25,10 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
     private final SongRepository songRepository;
+    private final QuizService quizService;
 
     @GetMapping(value = "/main/songs/{memberId}")
-    public HomeDto songs(@PathVariable("memberId") Long memberId){
+    public HomeDto songs(@PathVariable("memberId") Long memberId) {
         List<Song> userSong = songService.findUserSong(memberId);
         List<SongDto> list = userSong.stream()
                 .map(s -> new SongDto(
@@ -35,13 +41,15 @@ public class SongController {
         return new HomeDto(list, 5, 5);
 
     }
+
     @GetMapping("/song/words")
-    public List<WordDto> usedWords(@RequestParam("songId") Long songId){
+    public List<WordDto> usedWords(@RequestParam("songId") Long songId) {
         List<Word> wordsInSong = songRepository.findWithSongWord(songId);
         return wordsInSong.stream().map(WordDto::new).toList();
     }
+
     @GetMapping("/song/search")
-    public SearchResultDtoV2 searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId){
+    public SearchResultDtoV2 searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId) {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
         List<Tuple> resultSet = songService.searchSong(memberId, title, artist);
@@ -50,22 +58,19 @@ public class SongController {
                         t.get(0, Song.class),
                         t.get(1, Boolean.class))).toList();
 
-        if(result.isEmpty())
+        if (result.isEmpty())
             return new SearchResultDtoV2(null, false);
         else
             return new SearchResultDtoV2(result, true);
     }
 
     @PostMapping("/song/remote")
-    public SearchResultDtoV2 searchRemote(@ModelAttribute SongSearch songSearch){
+    public SearchResultDtoV2 searchRemote(@ModelAttribute SongSearch songSearch) {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
-        List<Song> findSongs = songService.searchDbSong(title, artist);
-        if(!findSongs.isEmpty())
-            return new SearchResultDtoV2(null, false);
 
         List<Song> newSongs = songService.searchRemoteSong(title, artist);
-        if(newSongs.isEmpty())
+        if (newSongs.isEmpty())
             return new SearchResultDtoV2(null, false);
         List<SongDtoV2> result = newSongs.stream()
                 .map(s -> new SongDtoV2(s, false)).toList();
@@ -74,14 +79,32 @@ public class SongController {
     }
 
     @PostMapping("/songs/new")
-    public String register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException {
-        return songService.registerSong(registerDto.getMemberId(), registerDto.getSongId());
+    public String register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException, IOException {
+        return songService.registerSong(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
     }
 
     @GetMapping(value = "/image/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public byte[] search(@PathVariable("songId") Long songId){
+    public byte[] search(@PathVariable("songId") Long songId) {
         Song song = songRepository.findById(songId).get();
         return song.getThumbnail();
+    }
+
+    @GetMapping(value = "/image/small/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] image(@PathVariable("songId") Long songId) {
+        Song song = songRepository.findById(songId).get();
+        return song.getSmallThumbnail();
+    }
+
+    @Transactional
+    @PostMapping("/set")
+    public void set() throws NoSearchResultException {
+        List<Song> songs = songRepository.findAll();
+        for (Song song : songs) {
+            List<SongInfo> songInfos = BugsCrawler.callBugsApi(song.getTitle(), song.getArtist());
+            String thumbnailUrlLarge = songInfos.get(0).getThumbnailUrl_large();
+            byte[] bytes = BugsCrawler.imageToByte(thumbnailUrlLarge);
+            song.setThumbnail(bytes);
+        }
     }
 }
 

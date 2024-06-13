@@ -13,4 +13,6 @@ public interface SongRepository extends JpaRepository<Song, Long>, SongRepositor
 
     @Query("select sw.word from Song s join s.songWords sw where s.id = :songId")
     List<Word> findWithSongWord(@Param("songId") Long songId);
+
+    List<Song> findByArtistAndTitle(String artist, String title);
 }

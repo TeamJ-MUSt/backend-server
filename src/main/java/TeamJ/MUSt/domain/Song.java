@@ -25,17 +25,22 @@ public class Song {
     @Lob
     private byte[] thumbnail;
 
+    @Lob
+    private byte[] smallThumbnail;
+
     @OneToMany(mappedBy = "song")
     private List<MemberSong> memberSongs = new ArrayList<>();
 
     @OneToMany(mappedBy = "song", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<SongWord> songWords = new ArrayList<>();
 
-    public Song(String title, String artist, String lyrics, byte[] thumbnail) {
+    private String bugsId;
+    public Song(String title, String artist, byte[] smallThumbnail, byte[] thumbnail, String bugsId) {
         this.title = title;
         this.artist = artist;
-        this.lyric = lyrics.toCharArray();
+        this.smallThumbnail = smallThumbnail;
         this.thumbnail = thumbnail;
+        this.bugsId = bugsId;
     }
 
     public Song() {
@@ -45,4 +50,9 @@ public class Song {
     public void setLevel(Integer level) {
         this.level = level;
     }
+
+    public void setLyric(char[] lyric) {
+        this.lyric = lyric;
+    }
+    public void setThumbnail(byte[] image){this.thumbnail = image;}
 }

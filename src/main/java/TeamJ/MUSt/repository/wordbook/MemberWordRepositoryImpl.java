@@ -6,10 +6,9 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
-import static TeamJ.MUSt.domain.QMemberWord.*;
-import static TeamJ.MUSt.domain.QSongWord.*;
+import static TeamJ.MUSt.domain.QMemberWord.memberWord;
+import static TeamJ.MUSt.domain.QSongWord.songWord;
 
-//import static TeamJ.MUSt.domain.QWordBook.*;
 
 public class MemberWordRepositoryImpl implements MemberWordRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -17,6 +16,7 @@ public class MemberWordRepositoryImpl implements MemberWordRepositoryCustom {
     public MemberWordRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
+
     @Override
     public List<MemberWord> findWithMemberAndWord(Long memberId) {
         /*return  queryFactory
@@ -32,7 +32,7 @@ public class MemberWordRepositoryImpl implements MemberWordRepositoryCustom {
                 .delete(wordBook)
                 .where(wordBook.word.spelling.eq(spelling)
                         .and(wordBook.word.meaning.eq(meaning))).execute();*/
-        return 1l;
+        return 1L;
     }
 
     @Override

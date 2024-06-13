@@ -7,7 +7,6 @@ import TeamJ.MUSt.service.QuizService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -16,17 +15,17 @@ import java.util.List;
 
 import static TeamJ.MUSt.domain.QuizType.*;
 
-//예외처리
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(maxAge = 3600)
 public class QuizController {
     private final QuizService quizService;
     private final QuizRepository quizRepository;
+
     @GetMapping("/quiz/info")
-    public SetNumDto quizz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type){
+    public SetNumDto quizz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) {
         int quizNum = quizRepository.countBySongIdAndType(songId, type);
-        if(quizNum == 0)
+        if (quizNum == 0)
             return new SetNumDto();
         int setNum = quizNum % 20 <= 10 ? quizNum / 20 : quizNum / 20 + 1;
         return new SetNumDto(true, setNum);
@@ -38,7 +37,7 @@ public class QuizController {
                                     @PathVariable("setNum") Integer pageNum) {
         List<QuizDto> quizDtos = quizService.findQuizzes(songId, type, pageNum).stream()
                 .map(QuizDto::new).toList();
-        if(quizDtos.isEmpty())
+        if (quizDtos.isEmpty())
             return new QuizResultDto(false);
         return new QuizResultDto(true, quizDtos);
     }
@@ -46,21 +45,22 @@ public class QuizController {
     @PostMapping("/quiz/new")
     public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) throws IOException {
         List<Quiz> quizzes = new ArrayList<>();
-        if(type == MEANING)
+        if (type == MEANING)
             quizzes = quizService.createMeaningQuiz(songId);
-        else if(type == READING)
+        else if (type == READING)
             quizzes = quizService.createReadingQuiz(songId);
-        else if(type == SENTENCE)
+        else if (type == SENTENCE)
             quizzes = quizService.createSentenceQuiz(songId);
 
-        if(quizzes == null || quizzes.isEmpty())
+        if (quizzes == null || quizzes.isEmpty())
             return new QuizResultDto(false);
 
         return new QuizResultDto(true);
     }
 
-    @Getter @Setter
-    static class SetNumDto{
+    @Getter
+    @Setter
+    static class SetNumDto {
         boolean success;
         int setNum;
 

@@ -25,33 +25,33 @@ public class BugsCrawler {
             ProcessBuilder searchProcessBuilder = new ProcessBuilder("python", searchScript, queryFile);
             Process searchProcess = searchProcessBuilder.start();
             searchResults = getSearchResult(searchProcess);
-
             List<SongInfo> garbageList = new ArrayList<>();
 
             for (SongInfo searchResult : searchResults) {
                 String id = searchResult.getMusic_id();
                 if (id == null) {
                     garbageList.add(searchResult);
-                    continue;
                 }
-                ProcessBuilder lyricsProcessBuilder = new ProcessBuilder("python", lyricsScript, id);
-                Process lyricsProcess = lyricsProcessBuilder.start();
-
-                String lyrics = getLyrics(lyricsProcess);
-                searchResult.setLyrics(lyrics);
             }
 
             for (SongInfo songInfo : garbageList) {
                 searchResults.remove(songInfo);
             }
 
-            if (searchResults.isEmpty())
+            if (searchResults.isEmpty()) {
                 throw new NoSearchResultException();
-
+            }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        return searchResults;
+        if (searchResults.size() <= 5)
+            return searchResults;
+        else {
+            List<SongInfo> subResults = new ArrayList<>();
+            for (int i = 0; i < 5; i++)
+                subResults.add(searchResults.get(i));
+            return subResults;
+        }
     }
 
     private static List<SongInfo> getSearchResult(Process p) throws IOException {
@@ -65,8 +65,10 @@ public class BugsCrawler {
         return new ArrayList<>(nestedList.get(0));
     }
 
-    private static String getLyrics(Process p) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+    public static String getLyrics(String id) throws IOException {
+        ProcessBuilder lyricsProcessBuilder = new ProcessBuilder("python", lyricsScript, id);
+        Process lyricsProcess = lyricsProcessBuilder.start();
+        BufferedReader br = new BufferedReader(new InputStreamReader(lyricsProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = "";
         str = br.readLine();
         return str;
@@ -84,7 +86,8 @@ public class BugsCrawler {
             System.out.println(e.getMessage());
         }
     }
-    public static byte[] imageToByte(String imageURL){
+
+    public static byte[] imageToByte(String imageURL) {
         byte[] imageBytes = null;
         try {
             URL url = new URL(imageURL);

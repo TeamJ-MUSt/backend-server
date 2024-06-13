@@ -2,12 +2,14 @@ package TeamJ.MUSt.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
+@ToString
 public class Word {
     public Word() {
     }

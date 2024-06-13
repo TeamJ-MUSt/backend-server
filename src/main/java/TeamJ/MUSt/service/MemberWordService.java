@@ -61,7 +61,8 @@ public class MemberWordService {
         List<Word> result = new ArrayList<>();
         for (String similarWord : similarWords) {
             Word findWord = wordRepository.findBySpelling(similarWord);
-            result.add(findWord);
+            if(findWord != null)
+                result.add(findWord);
         }
         return result;
     }

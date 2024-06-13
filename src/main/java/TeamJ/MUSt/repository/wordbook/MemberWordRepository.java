@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MemberWordRepository extends JpaRepository<MemberWord, Long>, MemberWordRepositoryCustom {
-    /*@Query("select mw.word from MemberWord mw where mw.member.id = (:memberId)")
-    List<Word> findWithWordByMemberId(@Param("memberId") Long memberId);*/
-    @Query("select mw.word from MemberWord mw join mw.word w where mw.member.id = (:memberId)")
+    @Query("select distinct mw.word from MemberWord mw join mw.word w where mw.member.id = (:memberId)")
     List<Word> findWithWordByMemberId(@Param("memberId") Long memberId);
 }
