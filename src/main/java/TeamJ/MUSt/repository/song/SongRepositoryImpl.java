@@ -2,9 +2,7 @@ package TeamJ.MUSt.repository.song;
 
 import TeamJ.MUSt.domain.*;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +12,7 @@ import java.util.List;
 import static TeamJ.MUSt.domain.QMemberSong.*;
 import static TeamJ.MUSt.domain.QSong.song;
 import static TeamJ.MUSt.domain.QSongWord.songWord;
+import static com.querydsl.jpa.JPAExpressions.*;
 
 public class SongRepositoryImpl implements SongRepositoryCustom{
 
@@ -50,8 +49,7 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
                 .selectDistinct(
                         song,
                         song.in(
-                                JPAExpressions
-                                        .select(memberSong.song)
+                                select(memberSong.song)
                                         .from(memberSong)
                                         .where(memberSong.member.id.eq(memberId))
                         )

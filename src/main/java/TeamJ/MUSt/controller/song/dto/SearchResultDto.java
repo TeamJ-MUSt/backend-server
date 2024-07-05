@@ -8,10 +8,10 @@ import java.util.List;
 @Getter
 @Setter
 public class SearchResultDto {
-    List<SongDto> songs;
+    List<SearchedSongDto> songs;
     boolean success;
 
-    public SearchResultDto(List<SongDto> songs, boolean success) {
+    public SearchResultDto(List<SearchedSongDto> songs, boolean success) {
         this.songs = songs;
         this.success = success;
     }

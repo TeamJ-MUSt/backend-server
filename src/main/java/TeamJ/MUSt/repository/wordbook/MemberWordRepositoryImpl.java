@@ -18,24 +18,6 @@ public class MemberWordRepositoryImpl implements MemberWordRepositoryCustom {
     }
 
     @Override
-    public List<MemberWord> findWithMemberAndWord(Long memberId) {
-        /*return  queryFactory
-                .select(wordBook)
-                .from(wordBook, wordBook.word, wordBook.member).fetchJoin()
-                .where(wordBook.member.id.eq(memberId)).fetch();*/
-        return null;
-    }
-
-    @Override
-    public long deleteBySpellingAndMeaning(String spelling, String meaning) {
-        /*return queryFactory
-                .delete(wordBook)
-                .where(wordBook.word.spelling.eq(spelling)
-                        .and(wordBook.word.meaning.eq(meaning))).execute();*/
-        return 1L;
-    }
-
-    @Override
     public long deleteMemberWordByMemberIdAndSongId(Long memberId, Long songId) {
         return queryFactory
                 .delete(memberWord)

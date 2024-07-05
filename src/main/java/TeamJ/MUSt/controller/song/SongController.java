@@ -30,8 +30,8 @@ public class SongController {
     @GetMapping(value = "/main/songs/{memberId}")
     public HomeDto songs(@PathVariable("memberId") Long memberId) {
         List<Song> userSong = songService.findUserSong(memberId);
-        List<SongDto> list = userSong.stream()
-                .map(s -> new SongDto(
+        List<MainSongDto> list = userSong.stream()
+                .map(s -> new MainSongDto(
                         s.getId(),
                         s.getTitle(),
                         s.getArtist(),
@@ -49,32 +49,32 @@ public class SongController {
     }
 
     @GetMapping("/song/search")
-    public SearchResultDtoV2 searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId) {
+    public SearchResultDto searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId) {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
         List<Tuple> resultSet = songService.searchSong(memberId, title, artist);
-        List<SongDtoV2> result = resultSet.stream()
-                .map(t -> new SongDtoV2(
+        List<SearchedSongDto> result = resultSet.stream()
+                .map(t -> new SearchedSongDto(
                         t.get(0, Song.class),
                         t.get(1, Boolean.class))).toList();
 
         if (result.isEmpty())
-            return new SearchResultDtoV2(null, false);
+            return new SearchResultDto(null, false);
         else
-            return new SearchResultDtoV2(result, true);
+            return new SearchResultDto(result, true);
     }
 
     @PostMapping("/song/remote")
-    public SearchResultDtoV2 searchRemote(@ModelAttribute SongSearch songSearch) {
+    public SearchResultDto searchRemote(@ModelAttribute SongSearch songSearch) {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
 
         List<Song> newSongs = songService.searchRemoteSong(title, artist);
         if (newSongs.isEmpty())
-            return new SearchResultDtoV2(null, false);
-        List<SongDtoV2> result = newSongs.stream()
-                .map(s -> new SongDtoV2(s, false)).toList();
-        return new SearchResultDtoV2(result, true);
+            return new SearchResultDto(null, false);
+        List<SearchedSongDto> result = newSongs.stream()
+                .map(s -> new SearchedSongDto(s, false)).toList();
+        return new SearchResultDto(result, true);
 
     }
 

@@ -2,9 +2,6 @@ package TeamJ.MUSt.controller;
 
 import TeamJ.MUSt.domain.Member;
 import TeamJ.MUSt.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -12,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,22 +20,6 @@ public class MemberController {
         Member member = new Member(name, password);
         return memberService.join(member);
     }
-
-    @PostMapping("/login")
-    public LoginResultDto login(
-            @Valid @RequestParam("loginId") String loginId,
-            @Valid @RequestParam("password") String password,
-            HttpServletRequest request) {
-        Member loginMember = memberService.login(loginId, password);
-        if (loginMember == null)
-            return new LoginResultDto(false);
-
-        String uuid = UUID.randomUUID().toString();
-        HttpSession session = request.getSession();
-        session.setAttribute(uuid, loginMember);
-        return new LoginResultDto(true);
-    }
-
     @Getter
     @Setter
     static class LoginResultDto {

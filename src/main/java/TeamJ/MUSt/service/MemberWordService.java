@@ -6,10 +6,8 @@ import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.repository.MemberRepository;
 import TeamJ.MUSt.repository.WordRepository;
 import TeamJ.MUSt.repository.wordbook.MemberWordRepository;
-import TeamJ.MUSt.util.MeaningResult;
 import TeamJ.MUSt.util.NlpModule;
 import TeamJ.MUSt.util.WordExtractor;
-import TeamJ.MUSt.util.WordInfo;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +25,6 @@ public class MemberWordService {
     private final WordRepository wordRepository;
     private final MemberRepository memberRepository;
     private final NlpModule module;
-    private final WordExtractor wordExtractor;
     private final EntityManager em;
     public List<Word> findUserWord(Long memberId){
 

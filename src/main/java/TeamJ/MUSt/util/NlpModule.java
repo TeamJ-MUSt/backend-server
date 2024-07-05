@@ -23,29 +23,6 @@ public class NlpModule {
     static String wordDbFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
     static String embeddingFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\embeddings.txt";
 
-    public int reflectContext(String lyric, Word word, String conjugation, int order) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        WordData wordData = new WordData(conjugation, word.getMeaning().stream().map(Meaning::getMeaning).toList());
-
-        String[] sentences = lyric.split("\\\\n");
-
-        ArrayList<String> matchingSentences = new ArrayList<>();
-        for (String sentence : sentences) {
-            if (sentence.contains(conjugation))
-                matchingSentences.add(sentence);
-        }
-        String targetSentence = matchingSentences.get(order);
-        String query = targetSentence + "@" + mapper.writeValueAsString(wordData);
-
-        query = query.replace('\"', '#');
-        ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, query);
-        Process extractProcess = contextProcessBuilder.start();
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
-        String str = br.readLine();
-        return Integer.parseInt(str.substring(1, 2));
-    }
-
     public ArrayList<String> reflectContextV2(String entireQuery) throws IOException {
         ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, entireQuery);
         Process extractProcess = contextProcessBuilder.start();

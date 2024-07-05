@@ -8,11 +8,10 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SongRepository extends JpaRepository<Song, Long>, SongRepositoryCustom {
-    List<Song> findByTitleContaining(String title);
+import static TeamJ.MUSt.domain.QMemberSong.memberSong;
+import static TeamJ.MUSt.domain.QSong.song;
 
+public interface SongRepository extends JpaRepository<Song, Long>, SongRepositoryCustom {
     @Query("select sw.word from Song s join s.songWords sw where s.id = :songId")
     List<Word> findWithSongWord(@Param("songId") Long songId);
-
-    List<Song> findByArtistAndTitle(String artist, String title);
 }

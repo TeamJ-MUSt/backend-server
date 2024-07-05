@@ -106,7 +106,6 @@ public class WordExtractor {
     }
 
     public List<MeaningResult> getMeaningResult() throws IOException{
-        long start = System.currentTimeMillis();
         List<MeaningResult> results = new ArrayList<>();
         ProcessBuilder meaningProcessBuilder = new ProcessBuilder("python", meaningScript, queryFile, "--threads=4");
         Process meaningProcess = meaningProcessBuilder.start();
@@ -140,7 +139,6 @@ public class WordExtractor {
                 results.add(new MeaningResult());
             }
         }
-        long end = System.currentTimeMillis();
         return results;
     }
     @Getter

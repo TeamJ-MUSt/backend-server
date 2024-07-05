@@ -4,7 +4,7 @@ import TeamJ.MUSt.domain.Song;
 import lombok.Getter;
 
 @Getter
-public class SongDtoV2 {
+public class SearchedSongDto {
     Long songId;
     String title;
     String artist;
@@ -13,7 +13,7 @@ public class SongDtoV2 {
     String bugsId;
 
     boolean hasSong;
-    public SongDtoV2(Song song, boolean hasSong) {
+    public SearchedSongDto(Song song, boolean hasSong) {
         this.songId = song.getId();
         this.title = song.getTitle();
         this.artist = song.getArtist();
@@ -22,6 +22,6 @@ public class SongDtoV2 {
         this.bugsId = song.getBugsId();
     }
 
-    public SongDtoV2() {
+    public SearchedSongDto() {
     }
 }

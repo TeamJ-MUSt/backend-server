@@ -16,7 +16,6 @@ public class MemberSongController {
     @PostMapping("/songs/delete")
     public String delete(@RequestParam("memberId") Long memberId, @RequestParam("songId") Long songId) {
         try {
-            //memberSongRepository.deleteByMemberIdAndSongId(memberId, songId);
             memberSongService.deleteSongInList(memberId, songId);
         } catch (Exception e) {
             return "삭제 실패";

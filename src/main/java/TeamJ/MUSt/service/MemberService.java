@@ -13,8 +13,4 @@ public class MemberService {
         memberRepository.save(member);
         return member.getId();
     }
-
-    public Member login(String id, String password){
-        return memberRepository.findByUsernameAndPassword(id, password);
-    }
 }

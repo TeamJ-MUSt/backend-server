@@ -60,8 +60,7 @@ public class BugsCrawler {
         str = br.readLine();
 
         ObjectMapper mapper = new ObjectMapper();
-        List<List<SongInfo>> nestedList = mapper.readValue(str, new TypeReference<List<List<SongInfo>>>() {
-        });
+        List<List<SongInfo>> nestedList = mapper.readValue(str, new TypeReference<List<List<SongInfo>>>() {});
         return new ArrayList<>(nestedList.get(0));
     }
 

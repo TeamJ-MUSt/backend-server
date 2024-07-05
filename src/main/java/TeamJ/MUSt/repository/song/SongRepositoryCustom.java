@@ -16,7 +16,8 @@ public interface SongRepositoryCustom {
     List<Song> findRequestSong(String title, String artist);
 
     int countSearchResult(String title, String artist);
-    @Query("select s from Song s join fetch s.memberSongs ms where ms.member.id = (:memberId) and s.level != 0")
+
+    //@Query("select s from Song s join fetch s.memberSongs ms where ms.member.id = (:memberId) and s.level != 0")
     List<Song> findWithMemberSong(@Param("memberId") Long memberId);
     List<Song> findWithMemberSong(Long memberId, Pageable pageable);
 
