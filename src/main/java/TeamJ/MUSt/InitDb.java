@@ -11,7 +11,6 @@ import TeamJ.MUSt.util.WordInfo;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
@@ -26,7 +25,7 @@ public class InitDb {
 
     private final InitService initService;
 
-    private static Song createSampleSong(String title, String artist) throws IOException, NoSearchResultException {
+    private static Song createSampleSong(String title, String artist) throws NoSearchResultException {
         List<SongInfo> songInfos = BugsCrawler.callBugsApi(title, artist);
         SongInfo firstSong = songInfos.get(0);
         return new Song(
@@ -100,6 +99,7 @@ public class InitDb {
                 List<WordInfo> wordInfos = wordExtractor.extractWords(song);
                 if (wordInfos == null)
                     continue;
+                wordExtractor.findMeaning(wordInfos, song);
 
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();

@@ -73,9 +73,8 @@ public class SongService {
         }
         return newSongs;
     }
-
     @Transactional
-    public boolean registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
+    public boolean registerSongV2(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
         String lyric = BugsCrawler.getLyrics(bugsId);
@@ -90,35 +89,40 @@ public class SongService {
             List<WordInfo> wordInfos = wordExtractor.extractWords(newSong);
             if (wordInfos.isEmpty())
                 return false;
+            ArrayList<WordInfo> newWords = new ArrayList<>();
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getLemma();
                 Word findWord = wordRepository.findBySpelling(spelling);
                 if (findWord == null && !wordInfo.getMeaning().isEmpty()) {
-                    List<String> before = wordInfo.getMeaning();
-                    before = before.stream()
-                            .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s)
-                            .filter(s -> !s.isEmpty() && s.chars().allMatch(ch -> ch < '\u4E00' || ch > '\u9FFF'))
-                            .toList();
-                    if (before.isEmpty())
-                        continue;
-                    List<Meaning> after = before.stream().map(Meaning::new).toList();
-                    Word newWord = new Word(
-                            wordInfo.getLemma(),
-                            wordInfo.getPronunciation(),
-                            after,
-                            wordInfo.getSpeechFields());
-                    wordRepository.save(newWord);
-                    for (Meaning meaning : after) {
-                        meaning.setWord(newWord);
-                    }
-                    SongWord songWord = new SongWord();
-                    songWord.createSongWord(newSong, newWord, wordInfo.getSurface());
+                    newWords.add(wordInfo);
                 } else {
                     if (findWord != null) {
                         SongWord songWord = new SongWord();
                         songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
                     }
                 }
+            }
+            wordExtractor.findMeaning(newWords, newSong);
+            for (WordInfo newWordInfo : newWords) {
+                List<String> before = newWordInfo.getMeaning();
+                before = before.stream()
+                        .map(s -> s.endsWith(".") ? s.substring(0, s.length() - 1) : s)
+                        .filter(s -> !s.isEmpty() && s.chars().allMatch(ch -> ch < '\u4E00' || ch > '\u9FFF'))
+                        .toList();
+                if (before.isEmpty())
+                    continue;
+                List<Meaning> after = before.stream().map(Meaning::new).toList();
+                Word newWord = new Word(
+                        newWordInfo.getLemma(),
+                        newWordInfo.getPronunciation(),
+                        after,
+                        newWordInfo.getSpeechFields());
+                wordRepository.save(newWord);
+                for (Meaning meaning : after)
+                    meaning.setWord(newWord);
+
+                SongWord songWord = new SongWord();
+                songWord.createSongWord(newSong, newWord, newWordInfo.getSurface());
             }
         }
         MemberSong memberSong = new MemberSong();

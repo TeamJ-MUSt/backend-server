@@ -21,48 +21,32 @@ public class WordExtractor {
     static String extractScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\extract_words.py";
     static String meaningScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\search_definitions.py";
 
-    private final SongRepository songRepository;
-    public List<WordInfo> extractWords(Song newSong) {
-        if(newSong.getLyric() == null || newSong.getLyric().length == 0){
-            newSong.setLevel(0);
-            return null;
-        }
-
-        List<WordInfo> wordsList = new ArrayList<>();
-        String lyrics = new String(newSong.getLyric());
-        makeQuery(lyrics);
-
-
+    public void findMeaning(List<WordInfo> wordList, Song newSong){
         int levelCount = 0;
         HashMap<Integer, Integer> map = new HashMap<>();
+
         for(int i = 1; i <= 5; i++)
             map.put(i, 0);
+
+        StringBuilder sb = new StringBuilder();
+        for (WordInfo wordInfo : wordList)
+            sb.append(wordInfo.getLemma()).append(" ");
+        makeQuery(sb.toString().trim());
+
         try{
-            List<ParsingResult> extractResult = getExtractResult();
-            StringBuilder sb = new StringBuilder();
-            for (ParsingResult item : extractResult)
-                sb.append(item.lemma).append(" ");
-
-            makeQuery(sb.toString().trim());
             List<MeaningResult> meaningResult = getMeaningResult();
-
             for(int i = 0; i < meaningResult.size(); i++){
-                ParsingResult current = extractResult.get(i);
+                WordInfo current = wordList.get(i);
                 map.merge(meaningResult.get(i).getLevel(), 1, Integer::sum);
+
                 if(current.getSurface().equals("\\"))
                     continue;
                 if(meaningResult.get(i).getLevel() != -1)
                     levelCount++;
 
-
-                WordInfo wordInfo = new WordInfo(
-                        current.getSurface(),
-                        current.getSpeechFields().get(0),
-                        current.getLemma().split("-")[0]);
                 if(meaningResult.get(i).getDefinitions() != null) {
-                    wordInfo.setMeaning(meaningResult.get(i).getDefinitions());
-                    wordInfo.setPronunciation(meaningResult.get(i).getPronounciation());
-                    wordsList.add(wordInfo);
+                    current.setMeaning(meaningResult.get(i).getDefinitions());
+                    current.setPronunciation(meaningResult.get(i).getPronounciation());
                 }
             }
         }catch (IOException e){
@@ -84,9 +68,34 @@ public class WordExtractor {
                 level = 3;
             newSong.setLevel(level);
         }
+    }
+    public List<WordInfo> extractWords(Song newSong) {
+        if(newSong.getLyric() == null || newSong.getLyric().length == 0){
+            newSong.setLevel(0);
+            return null;
+        }
+
+        List<WordInfo> wordsList = new ArrayList<>();
+        String lyrics = new String(newSong.getLyric());
+        makeQuery(lyrics);
+
+        try{
+            List<ParsingResult> extractResult = getExtractResult();
+            for(int i = 0; i < extractResult.size(); i++){
+                ParsingResult current = extractResult.get(i);
+                if(current.getSurface().equals("\\"))
+                    continue;
+                WordInfo wordInfo = new WordInfo(
+                        current.getSurface(),
+                        current.getSpeechFields().get(0),
+                        current.getLemma().split("-")[0]);
+                wordsList.add(wordInfo);
+            }
+        }catch (IOException e){
+            System.out.println(e.getMessage());
+        }
         return wordsList;
     }
-
     public void makeQuery(String lyrics) {
         try (PrintWriter pw = new PrintWriter(queryFile)) {
             pw.print(lyrics);

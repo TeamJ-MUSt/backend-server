@@ -112,6 +112,7 @@ public class InitRealDb {
                 List<WordInfo> wordInfos = wordExtractor.extractWords(song);
                 if (wordInfos == null)
                     continue;
+                wordExtractor.findMeaning(wordInfos, song);
 
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();
