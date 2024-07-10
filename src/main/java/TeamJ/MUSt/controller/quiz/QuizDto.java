@@ -1,4 +1,4 @@
-package TeamJ.MUSt.controller;
+package TeamJ.MUSt.controller.quiz;
 
 import TeamJ.MUSt.domain.Answer;
 import TeamJ.MUSt.domain.Choice;

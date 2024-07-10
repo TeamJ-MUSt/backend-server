@@ -75,7 +75,7 @@ public class SongService {
     }
 
     @Transactional
-    public String registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
+    public boolean registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
         String lyric = BugsCrawler.getLyrics(bugsId);
@@ -89,7 +89,7 @@ public class SongService {
         if (newSong.getSongWords().isEmpty()) {
             List<WordInfo> wordInfos = wordExtractor.extractWords(newSong);
             if (wordInfos.isEmpty())
-                return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
+                return false;
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getLemma();
                 Word findWord = wordRepository.findBySpelling(spelling);
@@ -113,18 +113,19 @@ public class SongService {
                     }
                     SongWord songWord = new SongWord();
                     songWord.createSongWord(newSong, newWord, wordInfo.getSurface());
-                    newSong.getSongWords().add(songWord);
                 } else {
                     if (findWord != null) {
                         SongWord songWord = new SongWord();
                         songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
-                        newSong.getSongWords().add(songWord);
                     }
                 }
             }
         }
         MemberSong memberSong = new MemberSong();
         memberSong.createMemberSong(member, newSong);
-        return newSong.getTitle() + " " + newSong.getArtist() + "가 성공적으로 등록되었습니다.";
+        quizService.createMeaningQuiz(newSong.getId());
+        quizService.createReadingQuiz(newSong.getId());
+        quizService.createSentenceQuiz(newSong.getId());
+        return true;
     }
 }

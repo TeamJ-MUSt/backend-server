@@ -11,7 +11,9 @@ import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.service.song.SongService;
 import TeamJ.MUSt.util.BugsCrawler;
 import com.querydsl.core.Tuple;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -79,8 +81,9 @@ public class SongController {
     }
 
     @PostMapping("/songs/new")
-    public String register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException, IOException {
-        return songService.registerSong(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
+    public RegisterResultDto register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException, IOException {
+        boolean result = songService.registerSong(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
+        return new RegisterResultDto(result);
     }
 
     @GetMapping(value = "/image/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -104,6 +107,15 @@ public class SongController {
             String thumbnailUrlLarge = songInfos.get(0).getThumbnailUrl_large();
             byte[] bytes = BugsCrawler.imageToByte(thumbnailUrlLarge);
             song.setThumbnail(bytes);
+        }
+    }
+    @Getter
+    @Setter
+    static class RegisterResultDto{
+        boolean success;
+
+        public RegisterResultDto(boolean success){
+            this.success = success;
         }
     }
 }

@@ -139,7 +139,6 @@ public class QuizService {
         List<SongWord> songWords = targetSong.getSongWords();
         List<Quiz> createdQuiz = new ArrayList<>();
         List<Word> choiceWords = wordRepository.findWithoutHiragana();
-
         for (SongWord songWord : songWords) {
             Word targetWord = songWord.getWord();
 
