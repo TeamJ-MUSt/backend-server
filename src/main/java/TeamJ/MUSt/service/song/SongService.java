@@ -74,7 +74,7 @@ public class SongService {
         return newSongs;
     }
     @Transactional
-    public boolean registerSongV2(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
+    public boolean registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
         String lyric = BugsCrawler.getLyrics(bugsId);

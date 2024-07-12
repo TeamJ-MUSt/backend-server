@@ -119,7 +119,7 @@ public class QuizService {
         String entireQuery = queries.toString();
         if (entireQuery.isEmpty())
             return createdQuiz;
-        ArrayList<String> usedMeaningIndex = module.reflectContextV2(entireQuery.substring(0, entireQuery.length() - 2));
+        ArrayList<String> usedMeaningIndex = module.reflectContext(entireQuery.substring(0, entireQuery.length() - 2));
         for (int i = 0; i < quizList.size(); i++) {
             createMeaningAnswer(answerList, quizList.get(i).getWord(), quizList.get(i), Integer.parseInt(usedMeaningIndex.get(i)));
             freqTable.merge(quizList.get(i).getWord().getSpelling(), 1, Integer::sum);

@@ -82,7 +82,7 @@ public class SongController {
 
     @PostMapping("/songs/new")
     public RegisterResultDto register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException, IOException {
-        boolean result = songService.registerSongV2(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
+        boolean result = songService.registerSong(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
         return new RegisterResultDto(result);
     }
 

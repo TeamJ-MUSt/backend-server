@@ -23,7 +23,7 @@ public class NlpModule {
     static String wordDbFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
     static String embeddingFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\embeddings.txt";
 
-    public ArrayList<String> reflectContextV2(String entireQuery) throws IOException {
+    public ArrayList<String> reflectContext(String entireQuery) throws IOException {
         ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, entireQuery);
         Process extractProcess = contextProcessBuilder.start();
         ObjectMapper objectMapper = new ObjectMapper();
