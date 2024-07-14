@@ -13,4 +13,8 @@ public class MemberService {
         memberRepository.save(member);
         return member.getId();
     }
+
+    public Member findLoginMember(String nickname, String password){
+        return memberRepository.findByUsernameAndPassword(nickname, password);
+    }
 }

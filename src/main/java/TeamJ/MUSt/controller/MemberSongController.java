@@ -2,10 +2,7 @@ package TeamJ.MUSt.controller;
 
 import TeamJ.MUSt.service.MemberSongService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,7 +11,8 @@ public class MemberSongController {
     private final MemberSongService memberSongService;
 
     @PostMapping("/songs/delete")
-    public String delete(@RequestParam("memberId") Long memberId, @RequestParam("songId") Long songId) {
+    public String delete(@SessionAttribute(name = "memberId", required = false) Long memberId,
+                         @RequestParam("songId") Long songId) {
         try {
             memberSongService.deleteSongInList(memberId, songId);
         } catch (Exception e) {

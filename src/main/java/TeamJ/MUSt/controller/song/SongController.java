@@ -27,10 +27,9 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
     private final SongRepository songRepository;
-    private final QuizService quizService;
 
-    @GetMapping(value = "/main/songs/{memberId}")
-    public HomeDto songs(@PathVariable("memberId") Long memberId) {
+    @GetMapping(value = "/main/songs")
+    public HomeDto songs(@SessionAttribute(name = "memberId", required = false) Long memberId) {
         List<Song> userSong = songService.findUserSong(memberId);
         List<MainSongDto> list = userSong.stream()
                 .map(s -> new MainSongDto(
@@ -51,7 +50,7 @@ public class SongController {
     }
 
     @GetMapping("/song/search")
-    public SearchResultDto searchSong(@ModelAttribute SongSearch songSearch, @RequestParam("memberId") Long memberId) {
+    public SearchResultDto searchSong(@ModelAttribute SongSearch songSearch, @SessionAttribute(name = "memberId", required = false) Long memberId) {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
         List<Tuple> resultSet = songService.searchSong(memberId, title, artist);
@@ -81,8 +80,10 @@ public class SongController {
     }
 
     @PostMapping("/songs/new")
-    public RegisterResultDto register(@ModelAttribute RegisterDto registerDto) throws NoSearchResultException, IOException {
-        boolean result = songService.registerSong(registerDto.getMemberId(), registerDto.getSongId(), registerDto.getBugsId());
+    public RegisterResultDto register(
+            @ModelAttribute RegisterDto registerDto,
+            @SessionAttribute(name = "memberId", required = false) Long memberId) throws NoSearchResultException, IOException {
+        boolean result = songService.registerSong(memberId, registerDto.getSongId(), registerDto.getBugsId());
         return new RegisterResultDto(result);
     }
 

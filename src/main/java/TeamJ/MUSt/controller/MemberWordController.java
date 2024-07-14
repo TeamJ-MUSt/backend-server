@@ -17,8 +17,8 @@ import java.util.List;
 public class MemberWordController {
     private final MemberWordService memberWordService;
 
-    @GetMapping("/word-book/{memberId}")
-    public MemberWordQueryDto words(@PathVariable("memberId") Long memberId) {
+    @GetMapping("/word-book")
+    public MemberWordQueryDto words(@SessionAttribute(name = "memberId", required = false) Long memberId) {
         List<Word> userWord = memberWordService.findUserWord(memberId);
         List<WordDto> result = userWord.stream().map(WordDto::new).toList();
         if (result.isEmpty())
@@ -28,7 +28,9 @@ public class MemberWordController {
     }
 
     @PostMapping("/word-book/delete")
-    public UpdateResultDto delete(@RequestParam("memberId") Long memberId, @RequestParam("songId") Long songId) {
+    public UpdateResultDto delete(
+            @SessionAttribute(name = "memberId", required = false) Long memberId,
+            @RequestParam("songId") Long songId) {
         long deleted = memberWordService.deleteWord(memberId, songId);
         if (deleted == 0)
             return new UpdateResultDto(false);
@@ -38,12 +40,14 @@ public class MemberWordController {
     }
 
     @PostMapping("/word-book/new")
-    public UpdateResultDto registerWord(@RequestParam("memberId") Long memberId, @RequestParam("songId") Long songId) {
+    public UpdateResultDto registerWord(
+            @SessionAttribute(name = "memberId", required = false) Long memberId,
+            @RequestParam("songId") Long songId) {
         boolean result = memberWordService.register(memberId, songId);
         return new UpdateResultDto(result);
     }
 
-    @GetMapping("/word-book/word/{wordId}/similar")
+    @GetMapping("/word-book/word/similar/{wordId}")
     public SimilarQueryDto similarWord(@PathVariable("wordId") Long wordId, @RequestParam("num") Integer num) throws IOException {
         List<Word> similarWords = memberWordService.similarWords(wordId, num);
         List<SimilarWordDto> list = similarWords.stream().map(w ->

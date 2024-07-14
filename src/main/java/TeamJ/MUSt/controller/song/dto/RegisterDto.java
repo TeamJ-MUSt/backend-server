@@ -6,12 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RegisterDto {
-    private Long memberId;
     private Long songId;
     private String bugsId;
 
-    public RegisterDto(Long memberId, Long songId, String bugsId) {
-        this.memberId = memberId;
+    public RegisterDto(Long songId, String bugsId) {
         this.songId = songId;
         this.bugsId = bugsId;
     }
