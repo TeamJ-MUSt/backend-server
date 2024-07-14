@@ -66,7 +66,7 @@ public class SongController {
     }
 
     @PostMapping("/song/remote")
-    public SearchResultDto searchRemote(@ModelAttribute SongSearch songSearch) {
+    public SearchResultDto searchRemote(@ModelAttribute SongSearch songSearch) throws NoSearchResultException {
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
 

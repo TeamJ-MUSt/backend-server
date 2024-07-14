@@ -51,30 +51,25 @@ public class SongService {
     }
 
     @Transactional
-    public List<Song> searchRemoteSong(String title, String artist) {
+    public List<Song> searchRemoteSong(String title, String artist) throws NoSearchResultException {
         List<Song> newSongs = new ArrayList<>();
-        try {
-            List<SongInfo> searchResults = BugsCrawler.callBugsApi(title, artist);
-            for (SongInfo searchResult : searchResults) {
-                if (songRepository.findRequestSong(searchResult.getTitle(), searchResult.getArtist()).isEmpty()) {
-                    Song newSong = new Song(searchResult.getTitle(),
-                            searchResult.getArtist().replaceAll("\\(.*?\\)", ""),
-                            BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
-                            BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
-                            searchResult.getMusic_id());
+        List<SongInfo> searchResults = BugsCrawler.callBugsApi(title, artist);
+        for (SongInfo searchResult : searchResults) {
+            if (songRepository.findRequestSong(searchResult.getTitle(), searchResult.getArtist()).isEmpty()) {
+                Song newSong = new Song(searchResult.getTitle(),
+                        searchResult.getArtist().replaceAll("\\(.*?\\)", ""),
+                        BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
+                        BugsCrawler.imageToByte(searchResult.getThumbnailUrl()),
+                        searchResult.getMusic_id());
 
-                    songRepository.save(newSong);
-                    newSongs.add(newSong);
-                }
+                songRepository.save(newSong);
+                newSongs.add(newSong);
             }
-
-        } catch (NoSearchResultException e) {
-            return null;
         }
         return newSongs;
     }
     @Transactional
-    public boolean registerSong(Long userId, Long songId, String bugsId) throws NoSearchResultException, IOException {
+    public boolean registerSong(Long userId, Long songId, String bugsId) throws IOException {
         Member member = memberRepository.findById(userId).get();
         Song newSong = songRepository.findById(songId).get();
         String lyric = BugsCrawler.getLyrics(bugsId);
