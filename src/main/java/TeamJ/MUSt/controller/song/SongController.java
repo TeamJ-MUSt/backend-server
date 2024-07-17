@@ -6,16 +6,13 @@ import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.domain.Word;
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.song.SongRepository;
-import TeamJ.MUSt.service.QuizService;
-import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.service.song.SongService;
-import TeamJ.MUSt.util.BugsCrawler;
 import com.querydsl.core.Tuple;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -27,6 +24,13 @@ import java.util.List;
 public class SongController {
     private final SongService songService;
     private final SongRepository songRepository;
+
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NoSearchResultException.class)
+    public SearchResultDto noSearchResult(){
+        return new SearchResultDto(null, false);
+    }
 
     @GetMapping(value = "/main/songs")
     public HomeDto songs(@SessionAttribute(name = "memberId", required = false) Long memberId) {
@@ -71,8 +75,6 @@ public class SongController {
         String artist = songSearch.getArtist();
 
         List<Song> newSongs = songService.searchRemoteSong(title, artist);
-        if (newSongs.isEmpty())
-            return new SearchResultDto(null, false);
         List<SearchedSongDto> result = newSongs.stream()
                 .map(s -> new SearchedSongDto(s, false)).toList();
         return new SearchResultDto(result, true);
@@ -82,7 +84,7 @@ public class SongController {
     @PostMapping("/songs/new")
     public RegisterResultDto register(
             @ModelAttribute RegisterDto registerDto,
-            @SessionAttribute(name = "memberId", required = false) Long memberId) throws NoSearchResultException, IOException {
+            @SessionAttribute(name = "memberId", required = false) Long memberId) throws IOException {
         boolean result = songService.registerSong(memberId, registerDto.getSongId(), registerDto.getBugsId());
         return new RegisterResultDto(result);
     }
@@ -99,17 +101,6 @@ public class SongController {
         return song.getSmallThumbnail();
     }
 
-    @Transactional
-    @PostMapping("/set")
-    public void set() throws NoSearchResultException {
-        List<Song> songs = songRepository.findAll();
-        for (Song song : songs) {
-            List<SongInfo> songInfos = BugsCrawler.callBugsApi(song.getTitle(), song.getArtist());
-            String thumbnailUrlLarge = songInfos.get(0).getThumbnailUrl_large();
-            byte[] bytes = BugsCrawler.imageToByte(thumbnailUrlLarge);
-            song.setThumbnail(bytes);
-        }
-    }
     @Getter
     @Setter
     static class RegisterResultDto{
