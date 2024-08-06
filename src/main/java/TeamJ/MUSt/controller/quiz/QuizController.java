@@ -2,7 +2,7 @@ package TeamJ.MUSt.controller.quiz;
 
 import TeamJ.MUSt.domain.Quiz;
 import TeamJ.MUSt.domain.QuizType;
-import TeamJ.MUSt.repository.QuizRepository;
+import TeamJ.MUSt.repository.quiz.QuizRepository;
 import TeamJ.MUSt.service.QuizService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

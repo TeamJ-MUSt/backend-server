@@ -2,7 +2,7 @@ package TeamJ.MUSt;
 
 import TeamJ.MUSt.domain.*;
 import TeamJ.MUSt.exception.NoSearchResultException;
-import TeamJ.MUSt.repository.WordRepository;
+import TeamJ.MUSt.repository.word.WordRepository;
 import TeamJ.MUSt.service.QuizService;
 import TeamJ.MUSt.service.song.SongInfo;
 import TeamJ.MUSt.util.BugsCrawler;

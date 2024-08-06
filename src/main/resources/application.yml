@@ -1,17 +1,17 @@
 spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/MUSt
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    #url: jdbc:mysql://localhost:3306/MUSt?serverTimezone=Asia/Seoul
-    #username: root
-    #password: "1234"
-    #driver-class-name: com.mysql.cj.jdbc.Driver
+    #url: jdbc:h2:tcp://localhost/~/MUSt
+    #username: sa
+    #password:
+    #driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/MUSt?serverTimezone=Asia/Seoul&rewriteBatchedStatements=true
+    username: root
+    password: "1234"
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true

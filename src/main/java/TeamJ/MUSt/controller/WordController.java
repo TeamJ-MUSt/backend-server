@@ -1,7 +1,7 @@
 package TeamJ.MUSt.controller;
 
 import TeamJ.MUSt.domain.Word;
-import TeamJ.MUSt.repository.WordRepository;
+import TeamJ.MUSt.repository.word.WordRepository;
 import TeamJ.MUSt.util.AllFieldWordInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;

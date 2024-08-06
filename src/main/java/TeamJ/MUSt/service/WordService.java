@@ -2,7 +2,7 @@ package TeamJ.MUSt.service;
 
 import TeamJ.MUSt.domain.Meaning;
 import TeamJ.MUSt.domain.Word;
-import TeamJ.MUSt.repository.WordRepository;
+import TeamJ.MUSt.repository.word.WordRepository;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
