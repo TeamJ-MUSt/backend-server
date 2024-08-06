@@ -25,4 +25,13 @@ public class WordInfo{
 
     public WordInfo() {
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        String otherLemma = ((WordInfo) obj).getLemma();
+        if(this.lemma.equals(otherLemma))
+            return true;
+        else
+            return false;
+    }
 }
