@@ -4,7 +4,6 @@ import TeamJ.MUSt.domain.Song;
 import TeamJ.MUSt.domain.Word;
 import com.querydsl.core.Tuple;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;

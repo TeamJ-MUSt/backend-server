@@ -1,6 +1,7 @@
 package TeamJ.MUSt.repository.song;
 
-import TeamJ.MUSt.domain.*;
+import TeamJ.MUSt.domain.Song;
+import TeamJ.MUSt.domain.Word;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -9,10 +10,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-import static TeamJ.MUSt.domain.QMemberSong.*;
+import static TeamJ.MUSt.domain.QMemberSong.memberSong;
 import static TeamJ.MUSt.domain.QSong.song;
 import static TeamJ.MUSt.domain.QSongWord.songWord;
-import static com.querydsl.jpa.JPAExpressions.*;
+import static com.querydsl.jpa.JPAExpressions.select;
 
 public class SongRepositoryImpl implements SongRepositoryCustom{
 
