@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class NlpModule {
     static String contextScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\context_definition.py";
     static String similarWordScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\similar_words.py";
@@ -26,7 +28,7 @@ public class NlpModule {
     public ArrayList<String> reflectContext(String entireQuery) throws IOException {
         ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, entireQuery);
         Process extractProcess = contextProcessBuilder.start();
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();;
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
         return objectMapper.readValue(str, new TypeReference<ArrayList<String>>() {
@@ -48,19 +50,19 @@ public class NlpModule {
         }
         return wordData.stream().map(SimilarWord::getLemma).toList();
     }
-
-    public String createQuerySentence(String lyric, Word word, String conjugation, int order) throws JsonProcessingException {
+    public String createQuerySentence(String lyric, Word word, String conjugation) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         WordData wordData = new WordData(conjugation, word.getMeaning().stream().map(Meaning::getMeaning).toList());
 
         String[] sentences = lyric.split("\\\\n");
 
-        ArrayList<String> matchingSentences = new ArrayList<>();
+        String targetSentence = "";
         for (String sentence : sentences) {
-            if (sentence.contains(conjugation))
-                matchingSentences.add(sentence);
+            if (sentence.contains(conjugation)) {
+                targetSentence = sentence;
+                break;
+            }
         }
-        String targetSentence = matchingSentences.get(order);
         String query = targetSentence + "@" + mapper.writeValueAsString(wordData);
 
         return query.replace('\"', '#');
