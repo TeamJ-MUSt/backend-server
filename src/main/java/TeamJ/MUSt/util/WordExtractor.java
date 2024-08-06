@@ -1,21 +1,25 @@
 package TeamJ.MUSt.util;
 
 import TeamJ.MUSt.domain.Song;
-import TeamJ.MUSt.repository.song.SongRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class WordExtractor {
     static String queryFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\queries.txt";
     static String extractScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\word-extractor\\extract_words.py";
@@ -94,7 +98,7 @@ public class WordExtractor {
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
-        return wordsList;
+        return wordsList.stream().distinct().toList();
     }
     public void makeQuery(String lyrics) {
         try (PrintWriter pw = new PrintWriter(queryFile)) {
@@ -120,6 +124,7 @@ public class WordExtractor {
         Process meaningProcess = meaningProcessBuilder.start();
         BufferedReader br = new BufferedReader(new InputStreamReader(meaningProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
+
         if(str == null)
             return null;
         str = str.replaceAll("'(\\w+)':", "\"$1\":").replaceAll("'(.*?)'", "\"$1\"");
