@@ -6,7 +6,7 @@ import lombok.Getter;
 @Entity
 @Getter
 public class SongWord {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "song_word_id")
     private Long id;
 

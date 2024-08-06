@@ -49,7 +49,7 @@ public class QSongWord extends EntityPathBase<SongWord> {
     public QSongWord(Class<? extends SongWord> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.song = inits.isInitialized("song") ? new QSong(forProperty("song")) : null;
-        this.word = inits.isInitialized("word") ? new QWord(forProperty("word"), inits.get("word")) : null;
+        this.word = inits.isInitialized("word") ? new QWord(forProperty("word")) : null;
     }
 
 }

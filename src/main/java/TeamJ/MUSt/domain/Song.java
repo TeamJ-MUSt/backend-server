@@ -20,18 +20,21 @@ public class Song {
     private Integer level;
 
     @Lob
+    @Column(columnDefinition = "longtext")
     private char[] lyric;
 
     @Lob
+    @Column(columnDefinition = "longblob")
     private byte[] thumbnail;
 
     @Lob
+    @Column(columnDefinition = "longblob")
     private byte[] smallThumbnail;
 
     @OneToMany(mappedBy = "song")
     private List<MemberSong> memberSongs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "song")
     private List<SongWord> songWords = new ArrayList<>();
 
     private String bugsId;

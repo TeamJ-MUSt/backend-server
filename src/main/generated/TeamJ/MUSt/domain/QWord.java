@@ -18,8 +18,6 @@ public class QWord extends EntityPathBase<Word> {
 
     private static final long serialVersionUID = 623786032L;
 
-    private static final PathInits INITS = PathInits.DIRECT2;
-
     public static final QWord word = new QWord("word");
 
     public final StringPath classOfWord = createString("classOfWord");
@@ -32,8 +30,6 @@ public class QWord extends EntityPathBase<Word> {
 
     public final ListPath<Meaning, QMeaning> meaning = this.<Meaning, QMeaning>createList("meaning", Meaning.class, QMeaning.class, PathInits.DIRECT2);
 
-    public final QMember member;
-
     public final ListPath<MemberWord, QMemberWord> memberWords = this.<MemberWord, QMemberWord>createList("memberWords", MemberWord.class, QMemberWord.class, PathInits.DIRECT2);
 
     public final ListPath<SongWord, QSongWord> songWords = this.<SongWord, QSongWord>createList("songWords", SongWord.class, QSongWord.class, PathInits.DIRECT2);
@@ -41,24 +37,15 @@ public class QWord extends EntityPathBase<Word> {
     public final StringPath spelling = createString("spelling");
 
     public QWord(String variable) {
-        this(Word.class, forVariable(variable), INITS);
+        super(Word.class, forVariable(variable));
     }
 
     public QWord(Path<? extends Word> path) {
-        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
+        super(path.getType(), path.getMetadata());
     }
 
     public QWord(PathMetadata metadata) {
-        this(metadata, PathInits.getFor(metadata, INITS));
-    }
-
-    public QWord(PathMetadata metadata, PathInits inits) {
-        this(Word.class, metadata, inits);
-    }
-
-    public QWord(Class<? extends Word> type, PathMetadata metadata, PathInits inits) {
-        super(type, metadata, inits);
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
+        super(Word.class, metadata);
     }
 
 }

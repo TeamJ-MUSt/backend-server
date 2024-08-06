@@ -6,7 +6,7 @@ import lombok.Getter;
 @Entity
 @Getter
 public class Choice {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "choice_id")
     private Long id;
 

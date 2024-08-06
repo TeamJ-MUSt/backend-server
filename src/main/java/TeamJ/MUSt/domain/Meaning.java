@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class Meaning {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "meaning_id")
     private Long id;
 
@@ -22,7 +22,10 @@ public class Meaning {
     public Meaning(String meaning) {
         this.meaning = meaning;
     }
-
+    public Meaning(String meaning, Word word) {
+        this.meaning = meaning;
+        this.word = word;
+    }
     public Meaning() {
     }
 }

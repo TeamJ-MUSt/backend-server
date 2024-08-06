@@ -12,7 +12,7 @@ public class Quiz {
     public Quiz() {
     }
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "quiz_id")
     private Long id;
 
@@ -27,10 +27,10 @@ public class Quiz {
     @Enumerated(EnumType.STRING)
     private QuizType type;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quiz")
     private List<Answer> answers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "quiz")
     private List<Choice> choices = new ArrayList<>();
 
     public Quiz(Song song, Word word, QuizType type, List<Answer> answers, List<Choice> choices) {
@@ -40,11 +40,20 @@ public class Quiz {
         this.answers = answers;
         this.choices = choices;
     }
+    public Quiz(Song song, Word word, QuizType type) {
+        this.song = song;
+        this.word = word;
+        this.type = type;
+    }
 
     public Quiz(Song song, QuizType type, List<Answer> answers, List<Choice> choices) {
         this.song = song;
         this.type = type;
         this.answers = answers;
         this.choices = choices;
+    }
+
+    public void initId(Long id){
+        this.id = id;
     }
 }

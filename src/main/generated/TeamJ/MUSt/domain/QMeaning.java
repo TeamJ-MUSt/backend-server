@@ -46,7 +46,7 @@ public class QMeaning extends EntityPathBase<Meaning> {
 
     public QMeaning(Class<? extends Meaning> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.word = inits.isInitialized("word") ? new QWord(forProperty("word"), inits.get("word")) : null;
+        this.word = inits.isInitialized("word") ? new QWord(forProperty("word")) : null;
     }
 
 }

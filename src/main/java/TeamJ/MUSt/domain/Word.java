@@ -14,7 +14,7 @@ public class Word {
     public Word() {
     }
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "word_id")
     private Long id;
 
@@ -24,14 +24,10 @@ public class Word {
 
     private String jpPronunciation;
 
-    @OneToMany(mappedBy = "word", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "word")
     private List<Meaning> meaning;
 
     private String classOfWord;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @OneToMany(mappedBy = "word")
     List<SongWord> songWords = new ArrayList<>();
@@ -45,4 +41,18 @@ public class Word {
         this.meaning = meaning;
         this.classOfWord = classOfWord;
     }
+    public Word(String spelling, String jpPronunciation, String classOfWord) {
+        this.spelling = spelling;
+        this.jpPronunciation = jpPronunciation;
+        this.classOfWord = classOfWord;
+    }
+
+    public void updateId(Long id){
+        this.id = id;
+    }
+
+    public void updateMeaning(List<Meaning> meaning){
+        this.meaning = meaning;
+    }
+
 }

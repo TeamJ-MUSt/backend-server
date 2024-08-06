@@ -47,7 +47,7 @@ public class QMemberWord extends EntityPathBase<MemberWord> {
     public QMemberWord(Class<? extends MemberWord> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.word = inits.isInitialized("word") ? new QWord(forProperty("word"), inits.get("word")) : null;
+        this.word = inits.isInitialized("word") ? new QWord(forProperty("word")) : null;
     }
 
 }
