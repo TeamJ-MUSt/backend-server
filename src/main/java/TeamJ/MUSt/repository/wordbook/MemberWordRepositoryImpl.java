@@ -1,10 +1,7 @@
 package TeamJ.MUSt.repository.wordbook;
 
-import TeamJ.MUSt.domain.MemberWord;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-
-import java.util.List;
 
 import static TeamJ.MUSt.domain.QMemberWord.memberWord;
 import static TeamJ.MUSt.domain.QSongWord.songWord;
