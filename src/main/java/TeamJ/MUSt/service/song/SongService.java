@@ -3,8 +3,10 @@ package TeamJ.MUSt.service.song;
 import TeamJ.MUSt.domain.*;
 import TeamJ.MUSt.exception.NoSearchResultException;
 import TeamJ.MUSt.repository.MemberRepository;
-import TeamJ.MUSt.repository.WordRepository;
+import TeamJ.MUSt.repository.meaning.MeaningRepositoryImpl;
 import TeamJ.MUSt.repository.song.SongRepository;
+import TeamJ.MUSt.repository.songword.SongWordRepository;
+import TeamJ.MUSt.repository.word.WordRepository;
 import TeamJ.MUSt.service.QuizService;
 import TeamJ.MUSt.util.BugsCrawler;
 import TeamJ.MUSt.util.WordExtractor;
@@ -12,7 +14,7 @@ import TeamJ.MUSt.util.WordInfo;
 import com.querydsl.core.Tuple;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,27 +25,18 @@ import java.util.List;
 @Service
 @Getter
 @RequiredArgsConstructor
+@Slf4j
 public class SongService {
     private final SongRepository songRepository;
     private final MemberRepository memberRepository;
     private final WordExtractor wordExtractor;
     private final WordRepository wordRepository;
     private final QuizService quizService;
+    private final SongWordRepository songWordRepository;
+    private final MeaningRepositoryImpl meaningRepository;
 
     public List<Song> findUserSong(Long memberId) {
         return songRepository.findWithMemberSong(memberId);
-    }
-
-    public List<Song> findUserSong(Long memberId, Pageable pageRequest) {
-        return songRepository.findWithMemberSong(memberId, pageRequest);
-    }
-
-    public List<Song> searchMySong(Long memberId, String title, String artist) {
-        return songRepository.findInMySong(memberId, title, artist);
-    }
-
-    public List<Song> searchDbSong(String title, String artist) {
-        return songRepository.findRequestSong(title, artist);
     }
 
     public List<Tuple> searchSong(Long memberId, String title, String artist) {
@@ -68,6 +61,7 @@ public class SongService {
         }
         return newSongs;
     }
+
     @Transactional
     public boolean registerSong(Long userId, Long songId, String bugsId) throws IOException {
         Member member = memberRepository.findById(userId).get();
@@ -80,24 +74,29 @@ public class SongService {
             lyric = lyric.substring(2);
         }
         newSong.setLyric(lyric.toCharArray());
+
+        List<Word> newWordList = new ArrayList<>();
+        List<Meaning> newMeaningList = new ArrayList<>();
+        List<SongWord> newSongWordList = new ArrayList<>();
+
         if (newSong.getSongWords().isEmpty()) {
             List<WordInfo> wordInfos = wordExtractor.extractWords(newSong);
             if (wordInfos.isEmpty())
                 return false;
+
             ArrayList<WordInfo> newWords = new ArrayList<>();
             for (WordInfo wordInfo : wordInfos) {
                 String spelling = wordInfo.getLemma();
                 Word findWord = wordRepository.findBySpelling(spelling);
-                if (findWord == null && !wordInfo.getMeaning().isEmpty()) {
+                if (findWord == null) {
                     newWords.add(wordInfo);
                 } else {
-                    if (findWord != null) {
-                        SongWord songWord = new SongWord();
-                        songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
-                    }
+                    SongWord songWord = new SongWord();
+                    songWord.createSongWord(newSong, findWord, wordInfo.getSurface());
                 }
             }
             wordExtractor.findMeaning(newWords, newSong);
+
             for (WordInfo newWordInfo : newWords) {
                 List<String> before = newWordInfo.getMeaning();
                 before = before.stream()
@@ -112,18 +111,30 @@ public class SongService {
                         newWordInfo.getPronunciation(),
                         after,
                         newWordInfo.getSpeechFields());
-                wordRepository.save(newWord);
-                for (Meaning meaning : after)
+                newWordList.add(newWord);
+                for (Meaning meaning : after){
                     meaning.setWord(newWord);
-
+                    newMeaningList.add(meaning);
+                }
                 SongWord songWord = new SongWord();
                 songWord.createSongWord(newSong, newWord, newWordInfo.getSurface());
+                newSongWordList.add(songWord);
             }
         }
+
+        wordRepository.bulkSaveWord(newWordList);
+
+        meaningRepository.bulkSaveMeaning(newMeaningList);
+
+        songWordRepository.bulkSaveSongWord(newSongWordList);
+
         MemberSong memberSong = new MemberSong();
         memberSong.createMemberSong(member, newSong);
+
         quizService.createMeaningQuiz(newSong.getId());
+
         quizService.createReadingQuiz(newSong.getId());
+
         quizService.createSentenceQuiz(newSong.getId());
         return true;
     }
