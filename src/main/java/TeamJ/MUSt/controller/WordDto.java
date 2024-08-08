@@ -10,7 +10,6 @@ import java.util.List;
 public class WordDto {
     private Long id;
     private String spell;
-    private String enPro;
     private String japPro;
     private String classOfWord;
     private List<String> meaning;
@@ -19,10 +18,9 @@ public class WordDto {
     public WordDto(Word word) {
         this.id = word.getId();
         this.spell = word.getSpelling();
-        this.enPro = word.getEnPronunciation();
         this.japPro = word.getJpPronunciation();
         this.classOfWord = word.getClassOfWord();
-        this.meaning = word.getMeaning().stream().map(Meaning::getMeaning).toList();
+        this.meaning = word.getMeaning().stream().map(Meaning::getContent).toList();
         this.involvedSongs = word.getSongWords()
                 .stream().map(songWord ->songWord.getSong().getTitle()).toList();
     }

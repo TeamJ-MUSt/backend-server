@@ -20,9 +20,9 @@ public class QAnswer extends EntityPathBase<Answer> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QAnswer answer1 = new QAnswer("answer1");
+    public static final QAnswer answer = new QAnswer("answer");
 
-    public final StringPath answer = createString("answer");
+    public final StringPath content = createString("content");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

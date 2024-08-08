@@ -10,14 +10,14 @@ public class Choice {
     @Column(name = "choice_id")
     private Long id;
 
-    private String choice;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
     public Choice(String choice, Quiz quiz) {
-        this.choice = choice;
+        this.content = choice;
         this.quiz = quiz;
     }
 

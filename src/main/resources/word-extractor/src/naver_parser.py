@@ -189,4 +189,4 @@ def search_definitions_and_pron_and_level(driver, query, N):
 
 def search(driver, word, N):
     definitions, pron, level = search_definitions_and_pron_and_level(driver, word, N)
-    return {'word': word, 'definitions': definitions, 'pronounciation':pron, 'level':level}
+    return {'word': word, 'definitions': definitions, 'pronunciation':pron, 'level':level}

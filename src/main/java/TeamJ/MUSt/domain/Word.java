@@ -20,8 +20,6 @@ public class Word {
 
     private String spelling;
 
-    private String enPronunciation;
-
     private String jpPronunciation;
 
     @OneToMany(mappedBy = "word")

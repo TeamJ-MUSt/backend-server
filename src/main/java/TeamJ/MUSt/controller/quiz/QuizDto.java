@@ -16,11 +16,14 @@ public class QuizDto {
 
 
     public QuizDto(Quiz quiz) {
+
         if(quiz.getWord() == null)
             this.word = null;
         else
             this.word = quiz.getWord().getSpelling();
-        this.answers = quiz.getAnswers().stream().map(Answer::getAnswer).toList();
-        this.choices = quiz.getChoices().stream().map(Choice::getChoice).toList();
+
+        this.answers = quiz.getAnswers().stream().map(Answer::getContent).toList();
+
+        this.choices = quiz.getChoices().stream().map(Choice::getContent).toList();
     }
 }

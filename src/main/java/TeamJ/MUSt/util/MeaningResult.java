@@ -12,7 +12,7 @@ import java.util.List;
 public class MeaningResult {
     private String word;
     private List<String> definitions;
-    private String pronounciation;
+    private String pronunciation;
     private int level;
     public MeaningResult(){
     }

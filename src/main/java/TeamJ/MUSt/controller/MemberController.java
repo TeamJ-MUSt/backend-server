@@ -17,8 +17,11 @@ public class MemberController {
 
     @PostMapping("/members/new")
     public Long create(@RequestParam("name") String name, @RequestParam("password") String password) {
+
         Member member = new Member(name, password);
+
         return memberService.join(member);
+
     }
     @Getter
     @Setter

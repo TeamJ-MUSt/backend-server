@@ -18,24 +18,26 @@ public class LoginController {
 
     @PostMapping("/login")
     public LoginResultDto login(@Valid @ModelAttribute LoginForm loginForm, HttpServletRequest request){
+
         Member findMember = memberService.findLoginMember(loginForm.username, loginForm.getPassword());
-        if(findMember == null)
+
+        if(isInvalidMember(findMember))
             return new LoginResultDto(false);
 
-        HttpSession session = request.getSession();
-        session.setAttribute("memberId", findMember.getId());
+        putMemberInSession(request, findMember);
 
         return new LoginResultDto(true);
     }
-
     @PostMapping("/logout")
     public LoginResultDto logout(HttpServletRequest request){
+
         HttpSession session = request.getSession(false);
 
         if(session == null)
             return new LoginResultDto(false);
 
         session.invalidate();
+
         return new LoginResultDto(true);
     }
 
@@ -46,4 +48,15 @@ public class LoginController {
             this.success = success;
         }
     }
+
+
+    private static void putMemberInSession(HttpServletRequest request, Member findMember) {
+        HttpSession session = request.getSession();
+        session.setAttribute("memberId", findMember.getId());
+    }
+
+    private static boolean isInvalidMember(Member findMember) {
+        return findMember == null;
+    }
+
 }

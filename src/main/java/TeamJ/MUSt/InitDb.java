@@ -31,7 +31,7 @@ public class InitDb {
     private final InitService initService;
 
     private static Song createSampleSong(String title, String artist) throws NoSearchResultException {
-        List<SongInfo> songInfos = BugsCrawler.callBugsApi(title, artist);
+        List<SongInfo> songInfos = BugsCrawler.searchSongsInBugs(title, artist);
         SongInfo firstSong = songInfos.get(0);
         return new Song(
                 title,
@@ -75,7 +75,6 @@ public class InitDb {
     @RequiredArgsConstructor
     static class InitService {
         private final EntityManager em;
-        private final WordExtractor wordExtractor;
         private final WordRepository wordRepository;
         private final MeaningRepositoryImpl meaningRepository;
         private final SongWordRepository songWordRepository;
@@ -89,7 +88,7 @@ public class InitDb {
             for (Member member : members)
                 em.persist(member);
 
-            Song[] songs = new Song[8];
+            /*Song[] songs = new Song[8];
             songs[0] = createSampleSong("BETELGEUSE", "Yuuri");
             songs[1] = createSampleSong("nandemonaiya", "RADWIMPS");
             songs[2] = createSampleSong("lemon", "Yonezu kenshi");
@@ -106,12 +105,12 @@ public class InitDb {
 
             for (Song song : songs) {
                 String lyrics = BugsCrawler.getLyrics(song.getBugsId());
-                song.setLyric(lyrics.toCharArray());
+                song.updateLyric(lyrics.toCharArray());
                 em.persist(song);
-                List<WordInfo> wordInfos = wordExtractor.extractWords(song);
+                List<WordInfo> wordInfos = WordExtractor.extractWords(song);
                 if (wordInfos == null)
                     continue;
-                wordExtractor.findMeaning(wordInfos, song);
+                WordExtractor.findMeaning(wordInfos, song);
 
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();
@@ -133,7 +132,7 @@ public class InitDb {
                         newWords.add(newWord);
                         existingWordSet.put(spelling, newWord);
                         for (Meaning meaning : after) {
-                            meaning.setWord(newWord);
+                            meaning.updateWord(newWord);
                             newMeanings.add(meaning);
                         }
                         SongWord songWord = new SongWord();
@@ -150,11 +149,11 @@ public class InitDb {
                     }
                 }
             }
-            wordRepository.bulkSaveWord(newWords);
-            meaningRepository.bulkSaveMeaning(newMeanings);
-            songWordRepository.bulkSaveSongWord(newSongWord);
+            wordRepository.bulkSave(newWords);
+            meaningRepository.bulkSave(newMeanings);
+            songWordRepository.bulkSave(newSongWord);
             for (int i = 0; i < songs.length; i++)
-                new MemberSong().createMemberSong(members[0], songs[i]);
+                new MemberSong().createMemberSong(members[0], songs[i]);*/
         }
     }
 }

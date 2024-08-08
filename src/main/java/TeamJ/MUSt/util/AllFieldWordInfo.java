@@ -20,7 +20,7 @@ public class AllFieldWordInfo{
         this.speechFields = speechFields;
         this.pronunciation = pronunciation;
         this.lemma = lemma;
-        this.meaning = meanings.stream().map(m -> m.getMeaning()).toList();
+        this.meaning = meanings.stream().map(m -> m.getContent()).toList();
     }
 
     public AllFieldWordInfo() {

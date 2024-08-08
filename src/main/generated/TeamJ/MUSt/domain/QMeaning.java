@@ -20,11 +20,11 @@ public class QMeaning extends EntityPathBase<Meaning> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QMeaning meaning1 = new QMeaning("meaning1");
+    public static final QMeaning meaning = new QMeaning("meaning");
+
+    public final StringPath content = createString("content");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
-
-    public final StringPath meaning = createString("meaning");
 
     public final QWord word;
 

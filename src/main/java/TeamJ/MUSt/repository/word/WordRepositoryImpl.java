@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public class WordRepositoryImpl implements WordRepositoryCustom{
+    public static final String INSERT_QUERY = "INSERT INTO word (class_of_word, jp_pronunciation, spelling) VALUES (? ,? ,?)";
+    public static final int BATCH_SIZE = 1000;
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
 
@@ -24,17 +26,16 @@ public class WordRepositoryImpl implements WordRepositoryCustom{
     }
     @Transactional
     @Override
-    public List<Word> bulkSaveWord(List<Word> words) {
-        String sql = "INSERT INTO word (class_of_word, jp_pronunciation, spelling) VALUES (? ,? ,?)";
-        int batchSize = 1000;
+    public List<Word> bulkSave(List<Word> words) {
 
-        for (int i = 0; i < words.size(); i += batchSize) {
-            List<Word> batchList = words.subList(i, Math.min(i + batchSize, words.size()));
+        for (int i = 0; i < words.size(); i += BATCH_SIZE) {
+
+            List<Word> batchList = getBatchingList(words, i);
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.batchUpdate(
                     con -> {
-                        PreparedStatement ps = con.prepareStatement(sql, new String[]{"word_id"});
+                        PreparedStatement ps = con.prepareStatement(INSERT_QUERY, new String[]{"word_id"});
                         return ps;
                     },
                     new BatchPreparedStatementSetter() {
@@ -54,15 +55,26 @@ public class WordRepositoryImpl implements WordRepositoryCustom{
                     keyHolder
             );
 
-            List<Map<String, Object>> keyList = keyHolder.getKeyList();
+            List<Map<String, Object>> generatedKeys = keyHolder.getKeyList();
+
             for (int j = 0; j < batchList.size(); j++) {
                 Word word = batchList.get(j);
-                Number key = (Number) keyList.get(j).get("GENERATED_KEY");
-                word.updateId(key.longValue());
+                Long key = getGeneratedKey(generatedKeys, j);
+                word.updateId(key);
             }
         }
 
         em.flush();
         return words;
+    }
+
+    private static List<Word> getBatchingList(List<Word> words, int start) {
+        int end = Math.min(start + BATCH_SIZE, words.size());
+        return words.subList(start, end);
+    }
+
+    private static Long getGeneratedKey(List<Map<String, Object>> generatedKeys, int index) {
+        Number key = (Number) generatedKeys.get(index).get("GENERATED_KEY");
+        return key.longValue();
     }
 }

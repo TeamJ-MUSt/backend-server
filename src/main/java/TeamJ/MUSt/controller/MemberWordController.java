@@ -19,48 +19,66 @@ public class MemberWordController {
 
     @GetMapping("/word-book")
     public MemberWordQueryDto words(@SessionAttribute(name = "memberId", required = false) Long memberId) {
-        List<Word> userWord = memberWordService.findUserWord(memberId);
-        List<WordDto> result = userWord.stream().map(WordDto::new).toList();
-        if (result.isEmpty())
-            return new MemberWordQueryDto();
-        else
-            return new MemberWordQueryDto(true, result);
+        
+        List<Word> studiedWords = memberWordService.findUserWord(memberId);
+
+        if (hasStudiedWords(studiedWords)){
+            List<WordDto> studiedWordsDto = studiedWords.stream().map(WordDto::new).toList();
+
+            return new MemberWordQueryDto(true, studiedWordsDto);
+        }
+
+        return new MemberWordQueryDto();
     }
 
     @PostMapping("/word-book/delete")
     public UpdateResultDto delete(
             @SessionAttribute(name = "memberId", required = false) Long memberId,
-            @RequestParam("songId") Long songId) {
-        long deleted = memberWordService.deleteWord(memberId, songId);
-        if (deleted == 0)
+            @RequestParam("songId") Long songId
+    ) {
+
+        long deletedNum = memberWordService.deleteWord(memberId, songId);
+
+        if (deletedNum == 0)
             return new UpdateResultDto(false);
-        else
-            return new UpdateResultDto(true);
+
+        return new UpdateResultDto(true);
 
     }
 
     @PostMapping("/word-book/new")
     public UpdateResultDto registerWord(
             @SessionAttribute(name = "memberId", required = false) Long memberId,
-            @RequestParam("songId") Long songId) {
-        boolean result = memberWordService.register(memberId, songId);
-        return new UpdateResultDto(result);
+            @RequestParam("songId") Long songId
+    ) {
+
+        boolean addResult = memberWordService.register(memberId, songId);
+
+        return new UpdateResultDto(addResult);
     }
 
     @GetMapping("/word-book/word/similar/{wordId}")
-    public SimilarQueryDto similarWord(@PathVariable("wordId") Long wordId, @RequestParam("num") Integer num) throws IOException {
-        List<Word> similarWords = memberWordService.similarWords(wordId, num);
-        List<SimilarWordDto> list = similarWords.stream().map(w ->
+    public SimilarQueryDto similarWord(
+            @PathVariable("wordId") Long wordId,
+            @RequestParam("num") Integer num
+    ) throws IOException {
+
+        List<Word> similarWords = memberWordService.getSimilarWords(wordId, num);
+
+        List<SimilarWordDto> similarWordDtos = similarWords.stream().map(w ->
                 new SimilarWordDto(
                         w.getSpelling(),
                         w.getJpPronunciation(),
                         w.getClassOfWord(),
-                        w.getMeaning().stream().map(Meaning::getMeaning).toList())).toList();
-        if (list.isEmpty())
+                        w.getMeaning().stream().map(Meaning::getContent).toList())).toList();
+
+        if (hasSimilarWords(similarWordDtos))
             return new SimilarQueryDto();
-        else
-            return new SimilarQueryDto(true, list);
+
+        return new SimilarQueryDto(true, similarWordDtos);
     }
+
+
 
     @Getter
     static class UpdateResultDto {
@@ -98,5 +116,19 @@ public class MemberWordController {
 
         public SimilarQueryDto() {
         }
+    }
+
+    private static boolean hasStudiedWords(List<Word> studiedWords) {
+        if(studiedWords.isEmpty())
+            return false;
+
+        return true;
+    }
+
+    private static boolean hasSimilarWords(List<SimilarWordDto> similarWordDtos) {
+        if(similarWordDtos.isEmpty())
+            return false;
+
+        return true;
     }
 }

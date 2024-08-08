@@ -5,5 +5,5 @@ import TeamJ.MUSt.domain.SongWord;
 import java.util.List;
 
 public interface SongWordRepositoryCustom {
-    void bulkSaveSongWord(List<SongWord> songWords);
+    void bulkSave(List<SongWord> songWords);
 }

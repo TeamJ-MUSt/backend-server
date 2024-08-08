@@ -13,11 +13,12 @@ public class MemberSongController {
     @PostMapping("/songs/delete")
     public String delete(@SessionAttribute(name = "memberId", required = false) Long memberId,
                          @RequestParam("songId") Long songId) {
-        try {
-            memberSongService.deleteSongInList(memberId, songId);
-        } catch (Exception e) {
-            return "삭제 실패";
-        }
-        return "성공적으로 삭제";
+
+        int deletedNum = memberSongService.deleteSongInList(memberId, songId);
+
+        if(deletedNum > 0)
+            return "성공적으로 삭제";
+
+        return "삭제할 대상이 없음";
     }
 }

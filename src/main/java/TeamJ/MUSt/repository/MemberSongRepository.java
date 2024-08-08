@@ -8,5 +8,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface MemberSongRepository extends JpaRepository<MemberSong, Long> {
     @Transactional
-    void deleteByMemberIdAndSongId(Long memberId, Long songId);
+    int deleteByMemberIdAndSongId(Long memberId, Long songId);
 }

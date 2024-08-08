@@ -19,40 +19,54 @@ import static TeamJ.MUSt.domain.QuizType.*;
 @RequiredArgsConstructor
 @CrossOrigin(maxAge = 3600)
 public class QuizController {
+    public static final int SET_SIZE = 20;
     private final QuizService quizService;
     private final QuizRepository quizRepository;
 
     @GetMapping("/quiz/info")
-    public SetNumDto quizz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) {
-        int quizNum = quizRepository.countBySongIdAndType(songId, type);
-        if (quizNum == 0)
+    public SetNumDto quizz(@RequestParam("songId") Long songId, @RequestParam("quizType") QuizType quizType) {
+        int quizNum = quizRepository.countBySongIdAndType(songId, quizType);
+
+        if (isQuizAlreadyMade(quizNum))
             return new SetNumDto();
-        int setNum = quizNum % 20 <= 10 ? quizNum / 20 : quizNum / 20 + 1;
+
+        int setNum = getSetNum(quizNum);
+
         return new SetNumDto(true, setNum);
     }
 
     @GetMapping("/quiz/{type}/set/{setNum}")
-    public QuizResultDto quizzesSet(@RequestParam("songId") Long songId,
-                                    @PathVariable("type") QuizType type,
-                                    @PathVariable("setNum") Integer pageNum) {
-        List<QuizDto> quizDtos = quizService.findQuizzes(songId, type, pageNum).stream()
-                .map(QuizDto::new).toList();
+    public QuizResultDto quizzesSet(
+            @RequestParam("songId") Long songId,
+            @PathVariable("type") QuizType type,
+            @PathVariable("setNum") Integer pageNum
+    ) {
+        List<QuizDto> quizDtos = quizService
+                .findQuizzes(songId, type, pageNum)
+                .stream()
+                .map(QuizDto::new)
+                .toList();
+
         if (quizDtos.isEmpty())
             return new QuizResultDto(false);
+
         return new QuizResultDto(true, quizDtos);
     }
 
     @PostMapping("/quiz/new")
-    public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("type") QuizType type) throws IOException {
-        List<Quiz> quizzes = new ArrayList<>();
-        if (type == MEANING)
-            quizzes = quizService.createMeaningQuiz(songId);
-        else if (type == READING)
-            quizzes = quizService.createReadingQuiz(songId);
-        else if (type == SENTENCE)
-            quizzes = quizService.createSentenceQuiz(songId);
+    public QuizResultDto makeQuiz(@RequestParam("songId") Long songId, @RequestParam("quizType") QuizType quizType) throws IOException {
+        List<Quiz> createdQuizzes = new ArrayList<>();
 
-        if (quizzes == null || quizzes.isEmpty())
+        if (quizType == MEANING)
+            createdQuizzes = quizService.createMeaningQuiz(songId);
+
+        else if (quizType == READING)
+            createdQuizzes = quizService.createReadingQuiz(songId);
+
+        else if (quizType == SENTENCE)
+            createdQuizzes = quizService.createSentenceQuiz(songId);
+
+        if (createdQuizzes == null || createdQuizzes.isEmpty())//null을 반환하지 않게 하자
             return new QuizResultDto(false);
 
         return new QuizResultDto(true);
@@ -71,5 +85,14 @@ public class QuizController {
             this.success = success;
             this.setNum = setNum;
         }
+    }
+
+
+    private static boolean isQuizAlreadyMade(int quizNum) {
+        return quizNum == 0;
+    }
+
+    private static int getSetNum(int quizNum) {
+        return quizNum % SET_SIZE <= 10 ? quizNum / SET_SIZE : quizNum / SET_SIZE + 1;
     }
 }

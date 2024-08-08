@@ -10,6 +10,8 @@ import java.util.List;
 
 @Repository
 public class ChoiceRepository {
+    public static final String INSERT_QUERY = "insert into choice (quiz_id, content) values (?, ?)";
+    public static final int BATCH_SIZE = 1000;
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
 
@@ -19,19 +21,20 @@ public class ChoiceRepository {
     }
 
     public void bulkSaveChoice(List<Choice> choices){
-        String sql = "insert into choice (quiz_id, choice) values (?, ?)";
-        int batchSize = 1000;
-        for(int i = 0; i < choices.size(); i+= batchSize) {
-            List<Choice> batchList = choices.subList(i, Math.min(i + batchSize, choices.size()));
+        for(int i = 0; i < choices.size(); i+= BATCH_SIZE) {
+            List<Choice> batchList = choices.subList(i, Math.min(i + BATCH_SIZE, choices.size()));
+
             jdbcTemplate.batchUpdate(
-                    sql,
+                    INSERT_QUERY,
                     batchList,
-                    batchSize,
+                    BATCH_SIZE,
                     (ps, argument) -> {
                         ps.setLong(1, argument.getQuiz().getId());
-                        ps.setString(2, argument.getChoice());
+                        ps.setString(2, argument.getContent());
                     });
+
         }
+
         em.flush();
     }
 

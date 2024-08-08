@@ -23,7 +23,6 @@ public class MemberWordService {
     private final MemberWordRepository memberWordRepository;
     private final WordRepository wordRepository;
     private final MemberRepository memberRepository;
-    private final NlpModule module;
     private final EntityManager em;
     public List<Word> findUserWord(Long memberId){
 
@@ -41,25 +40,39 @@ public class MemberWordService {
     public boolean register(Long memberId, Long songId){
         Optional<Member> member = memberRepository.findById(memberId);
         List<Word> words = wordRepository.findWithSong(songId);
-        if(member.isEmpty() || words.isEmpty())
+
+        if(isInvalidRequest(member, words))
             return false;
+
         Member findMember = member.get();
+
         for (Word word : words) {
             MemberWord memberWord = new MemberWord(findMember, word);
             findMember.getMemberWords().add(memberWord);
         }
+
         return true;
     }
 
-    public List<Word> similarWords(Long wordId, Integer num) throws IOException {
-        Word word = wordRepository.findById(wordId).get();
-        List<String> similarWords = module.getSimilarWord(word.getSpelling(), num);
+    public List<Word> getSimilarWords(Long wordId, Integer num) throws IOException {
+        Word findWord = wordRepository.findById(wordId).get();
+
+        List<String> similarWordSpellings = NlpModule.getSpellingOfSimilarWord(findWord.getSpelling(), num);
+
+        return findSimilarWordEntity(similarWordSpellings);
+    }
+
+    private List<Word> findSimilarWordEntity(List<String> similarWordSpellings) {
         List<Word> result = new ArrayList<>();
-        for (String similarWord : similarWords) {
-            Word findWord = wordRepository.findBySpelling(similarWord);
-            if(findWord != null)
-                result.add(findWord);
+        for (String spelling : similarWordSpellings) {
+            Word similarWord = wordRepository.findBySpelling(spelling);
+            if(similarWord != null)
+                result.add(similarWord);
         }
         return result;
+    }
+
+    private static boolean isInvalidRequest(Optional<Member> member, List<Word> words) {
+        return member.isEmpty() || words.isEmpty();
     }
 }

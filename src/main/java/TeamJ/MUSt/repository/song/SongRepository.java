@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface SongRepository extends JpaRepository<Song, Long>, SongRepositoryCustom {
     @Query("select sw.word from Song s join s.songWords sw where s.id = :songId")
-    List<Word> findWithSongWord(@Param("songId") Long songId);
+    List<Word> findWithSongWordBySongId(@Param("songId") Long songId);
 }

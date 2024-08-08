@@ -18,7 +18,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WordService {
-    static String wordFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
+    static final String wordFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
+
     private final WordRepository wordRepository;
 
     public void writeWordList() {
@@ -52,7 +53,7 @@ public class WordService {
             this.lemma = word.getSpelling();
             this.speechField = word.getClassOfWord();
             this.pronunciation = word.getJpPronunciation();
-            this.meanings = word.getMeaning().stream().map(Meaning::getMeaning).toList();
+            this.meanings = word.getMeaning().stream().map(Meaning::getContent).toList();
         }
     }
 }

@@ -10,6 +10,8 @@ import java.util.List;
 
 @Repository
 public class AnswerRepository {
+    public static final String INSERT_QUERY = "insert into answer (quiz_id, content) values (?, ?)";
+    public static final int BATCH_SIZE = 1000;
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
 
@@ -19,19 +21,22 @@ public class AnswerRepository {
     }
 
     public void bulkSaveAnswer(List<Answer> answers){
-        String sql = "insert into answer (quiz_id, answer) values (?, ?)";
-        int batchSize = 1000;
-        for(int i = 0; i < answers.size(); i+= batchSize) {
-            List<Answer> batchList = answers.subList(i, Math.min(i + batchSize, answers.size()));
+
+        for(int i = 0; i < answers.size(); i+= BATCH_SIZE) {
+
+            List<Answer> batchList = answers.subList(i, Math.min(i + BATCH_SIZE, answers.size()));
+
             jdbcTemplate.batchUpdate(
-                    sql,
+                    INSERT_QUERY,
                     batchList,
-                    batchSize,
+                    BATCH_SIZE,
                     (ps, argument) -> {
                         ps.setLong(1, argument.getQuiz().getId());
-                        ps.setString(2, argument.getAnswer());
+                        ps.setString(2, argument.getContent());
                     });
         }
+
         em.flush();
     }
+
 }

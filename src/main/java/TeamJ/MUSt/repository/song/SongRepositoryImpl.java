@@ -32,18 +32,6 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
                 .fetch();
     }
 
-    public List<Song> findWithMemberSong(Long memberId, Pageable pageable){
-        return queryFactory
-                .selectDistinct(song)
-                .from(song)
-                .join(song.memberSongs, memberSong)
-                .fetchJoin()
-                .where(memberSong.member.id.eq(memberId))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-    }
-
     @Override
     public List<Tuple> findWithMemberSongCheckingRegister(Long memberId, String title, String artist) {
         return queryFactory
@@ -61,25 +49,13 @@ public class SongRepositoryImpl implements SongRepositoryCustom{
     }
 
     @Override
-    public List<Word> findUsedWords(Long songId) {
+    public List<Word> findWithSongWordById(Long songId) {
         return queryFactory
                 .select(songWord.word)
                 .from(song, songWord).fetchJoin()
                 .where(song.id.eq(songId))
                 .fetch();
     }
-
-    @Override
-    public List<Song> findInMySong(Long memberId, String title, String artist) {
-        return queryFactory
-                .selectDistinct(song)
-                .from(song)
-                .join(song.memberSongs, memberSong)
-                .fetchJoin()
-                .where(memberSong.member.id.eq(memberId), titleEq(title), artistEq(artist))
-                .fetch();
-    }
-
 
 
     @Override

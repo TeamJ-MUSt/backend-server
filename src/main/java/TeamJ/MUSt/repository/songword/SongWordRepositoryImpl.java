@@ -9,6 +9,8 @@ import javax.sql.DataSource;
 import java.util.List;
 
 public class SongWordRepositoryImpl implements SongWordRepositoryCustom{
+    public static final String INSERT_QUERY = "insert into song_word (song_id, word_id, surface) values (? ,? ,?)";
+    public static final int BATCH_SIZE = 1000;
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
     public SongWordRepositoryImpl(DataSource dataSource, EntityManager entityManager){
@@ -17,21 +19,32 @@ public class SongWordRepositoryImpl implements SongWordRepositoryCustom{
     }
     @Transactional
     @Override
-    public void bulkSaveSongWord(List<SongWord> songWords) {
-        String sql = "insert into song_word (song_id, word_id, surface) values (? ,? ,?)";
-        int batchSize = 1000;
-        for(int i = 0; i < songWords.size(); i+= batchSize) {
-            List<SongWord> batchList = songWords.subList(i, Math.min(i + batchSize, songWords.size()));
+    public void bulkSave(List<SongWord> songWords) {
+
+        for(int i = 0; i < songWords.size(); i+= BATCH_SIZE) {
+
+            List<SongWord> batchList = getBatchingList(songWords, i);
+
             jdbcTemplate.batchUpdate(
-                    sql,
+                    INSERT_QUERY,
                     batchList,
-                    batchSize,
+                    BATCH_SIZE,
                     (ps, argument) -> {
                         ps.setLong(1, argument.getSong().getId());
                         ps.setLong(2, argument.getWord().getId());
                         ps.setString(3, argument.getSurface());
                     });
+
         }
+
         em.flush();
+    }
+
+    private static List<SongWord> getBatchingList(List<SongWord> songWords, int start) {
+
+        int end = Math.min(start + BATCH_SIZE, songWords.size());
+
+        return songWords.subList(start, end);
+
     }
 }

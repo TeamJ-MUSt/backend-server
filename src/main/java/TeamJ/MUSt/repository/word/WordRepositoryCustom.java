@@ -5,5 +5,5 @@ import TeamJ.MUSt.domain.Word;
 import java.util.List;
 
 public interface WordRepositoryCustom {
-    List<Word> bulkSaveWord(List<Word> words);
+    List<Word> bulkSave(List<Word> words);
 }

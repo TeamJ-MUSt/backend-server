@@ -10,5 +10,5 @@ import java.util.List;
 public interface QuizRepositoryCustom {
     Page<Quiz> findQuizSet(Long songId, QuizType type, Pageable page);
 
-    void bulkSaveQuiz(List<Quiz> quizzes);
+    void bulkSave(List<Quiz> quizzes);
 }

@@ -5,5 +5,5 @@ import TeamJ.MUSt.domain.Meaning;
 import java.util.List;
 
 public interface MeaningRepositoryCustom {
-    void bulkSaveMeaning(List<Meaning> meanings);
+    void bulkSave(List<Meaning> meanings);
 }

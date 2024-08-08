@@ -11,8 +11,12 @@ import java.util.List;
 
 @Repository
 public class MeaningRepositoryImpl implements MeaningRepositoryCustom{
+
+    public static final int BATCH_SIZE = 1000;
+    public static final String INSERT_QUERY = "insert into meaning (word_id, content) values (?, ?)";
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
+
 
     public MeaningRepositoryImpl(DataSource dataSource, EntityManager entityManager){
         jdbcTemplate = new JdbcTemplate(dataSource);
@@ -20,18 +24,16 @@ public class MeaningRepositoryImpl implements MeaningRepositoryCustom{
     }
 
     @Transactional
-    public void bulkSaveMeaning(List<Meaning> meanings){
-        String sql = "insert into meaning (word_id, meaning) values (?, ?)";
-        int batchSize = 1000;
-        for(int i = 0; i < meanings.size(); i+= batchSize) {
-            List<Meaning> batchList = meanings.subList(i, Math.min(i + batchSize, meanings.size()));
+    public void bulkSave(List<Meaning> meanings){
+        for(int i = 0; i < meanings.size(); i+= BATCH_SIZE) {
+            List<Meaning> batchList = meanings.subList(i, Math.min(i + BATCH_SIZE, meanings.size()));
             jdbcTemplate.batchUpdate(
-                    sql,
+                    INSERT_QUERY,
                     batchList,
-                    batchSize,
+                    BATCH_SIZE,
                     (ps, argument) -> {
                         ps.setLong(1, argument.getWord().getId());
-                        ps.setString(2, argument.getMeaning());
+                        ps.setString(2, argument.getContent());
                     });
         }
         em.flush();

@@ -29,7 +29,7 @@ public class InitRealDb {
     private final InitService initService;
 
     private static Song createSampleSong(String title, String artist) throws IOException, NoSearchResultException {
-        List<SongInfo> songInfos = BugsCrawler.callBugsApi(title, artist);
+        List<SongInfo> songInfos = BugsCrawler.searchSongsInBugs(title, artist);
         SongInfo firstSong = songInfos.get(0);
         return new Song(
                 title,
@@ -107,12 +107,12 @@ public class InitRealDb {
             }
             for (Song song : songs) {
                 String lyrics = BugsCrawler.getLyrics(song.getBugsId());
-                song.setLyric(lyrics.toCharArray());
+                song.updateLyric(lyrics.toCharArray());
                 em.persist(song);
-                List<WordInfo> wordInfos = wordExtractor.extractWords(song);
+                List<WordInfo> wordInfos = WordExtractor.extractWords(song);
                 if (wordInfos == null)
                     continue;
-                wordExtractor.findMeaning(wordInfos, song);
+                WordExtractor.findMeaning(wordInfos, song);
 
                 for (WordInfo wordInfo : wordInfos) {
                     String spelling = wordInfo.getLemma();
@@ -133,7 +133,7 @@ public class InitRealDb {
                                 wordInfo.getSpeechFields());
                         em.persist(newWord);
                         for (Meaning meaning : after) {
-                            meaning.setWord(newWord);
+                            meaning.updateWord(newWord);
                         }
                         SongWord songWord = new SongWord();
                         songWord.createSongWord(song, newWord, wordInfo.getSurface());

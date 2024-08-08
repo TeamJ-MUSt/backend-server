@@ -50,12 +50,11 @@ public class Song {
 
     }
 
-    public void setLevel(Integer level) {
+    public void updateLevel(Integer level) {
         this.level = level;
     }
 
-    public void setLyric(char[] lyric) {
+    public void updateLyric(char[] lyric) {
         this.lyric = lyric;
     }
-    public void setThumbnail(byte[] image){this.thumbnail = image;}
 }

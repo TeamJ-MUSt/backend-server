@@ -12,5 +12,5 @@ import java.util.List;
 public interface SongWordRepository extends JpaRepository<SongWord, Long>, SongWordRepositoryCustom {
 
     @Query("select sw from SongWord sw join fetch sw.word where sw.song.id = :songId")
-    List<SongWord> findSongWordsWithWordBySongId(@Param("songId") Long songId);
+    List<SongWord> findWithWordBySongId(@Param("songId") Long songId);
 }

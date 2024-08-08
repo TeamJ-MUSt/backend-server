@@ -53,7 +53,7 @@ public class Quiz {
         this.choices = choices;
     }
 
-    public void initId(Long id){
+    public void updateId(Long id){
         this.id = id;
     }
 }

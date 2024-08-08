@@ -9,6 +9,7 @@ public class MainSongDto {
     String artist;
     String lyrics;
     Integer level;
+
     public MainSongDto(Long songId, String title, String artist, String lyrics, Integer level) {
         this.songId = songId;
         this.title = title;

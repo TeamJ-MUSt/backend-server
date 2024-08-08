@@ -20,9 +20,9 @@ public class QChoice extends EntityPathBase<Choice> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QChoice choice1 = new QChoice("choice1");
+    public static final QChoice choice = new QChoice("choice");
 
-    public final StringPath choice = createString("choice");
+    public final StringPath content = createString("content");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

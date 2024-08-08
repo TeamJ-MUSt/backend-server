@@ -9,16 +9,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface SongRepositoryCustom {
-    List<Word> findUsedWords(Long songId);
+    //쿼리 메소드로 처리 가능할 듯
+    List<Word> findWithSongWordById(Long songId);
 
-    List<Song> findInMySong(Long memberId, String title, String artist);
     List<Song> findRequestSong(String title, String artist);
 
     int countSearchResult(String title, String artist);
 
-    //@Query("select s from Song s join fetch s.memberSongs ms where ms.member.id = (:memberId) and s.level != 0")
+    //쿼리 메소드로 처리 가능할 듯
     List<Song> findWithMemberSong(@Param("memberId") Long memberId);
-    List<Song> findWithMemberSong(Long memberId, Pageable pageable);
 
     List<Tuple> findWithMemberSongCheckingRegister(Long memberId, String title, String artist);
 }

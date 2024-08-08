@@ -22,8 +22,6 @@ public class QWord extends EntityPathBase<Word> {
 
     public final StringPath classOfWord = createString("classOfWord");
 
-    public final StringPath enPronunciation = createString("enPronunciation");
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath jpPronunciation = createString("jpPronunciation");

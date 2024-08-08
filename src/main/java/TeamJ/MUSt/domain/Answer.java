@@ -10,14 +10,14 @@ public class Answer {
     @Column(name = "answer_id")
     private Long id;
 
-    private String answer;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
     public Answer(String answer, Quiz quiz) {
-        this.answer = answer;
+        this.content = answer;
         this.quiz = quiz;
     }
 

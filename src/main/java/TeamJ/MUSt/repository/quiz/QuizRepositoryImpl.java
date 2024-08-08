@@ -23,6 +23,8 @@ import java.util.Map;
 import static TeamJ.MUSt.domain.QQuiz.quiz;
 
 public class QuizRepositoryImpl implements QuizRepositoryCustom {
+    public static final String INSERT_QUERY = "insert into quiz (song_id, word_id, type) values (?, ?, ?)";
+    public static final int BATCH_SIZE = 1000;
     private final JPAQueryFactory queryFactory;
     private final JdbcTemplate jdbcTemplate;
     private final EntityManager em;
@@ -42,23 +44,27 @@ public class QuizRepositoryImpl implements QuizRepositoryCustom {
                 .offset(page.getOffset())
                 .limit(page.getPageSize())
                 .fetch();
+
         JPAQuery<Quiz> countQuery = queryFactory
                 .select(quiz)
                 .from(quiz)
                 .where(quiz.song.id.eq(songId), quiz.type.eq(type));
+
         return PageableExecutionUtils.getPage(content, page, countQuery::fetchCount);
     }
 
     @Override
-    public void bulkSaveQuiz(List<Quiz> quizzes) {
-        String sql = "insert into quiz (song_id, word_id, type) values (?, ?, ?)";
-        int batchSize = 1000;
+    public void bulkSave(List<Quiz> quizzes) {
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        for (int i = 0; i < quizzes.size(); i += batchSize) {
-            List<Quiz> batchList = quizzes.subList(i, Math.min(i + batchSize, quizzes.size()));
+
+        for (int i = 0; i < quizzes.size(); i += BATCH_SIZE) {
+
+            List<Quiz> batchList = getBatchingList(quizzes, i);
+
             jdbcTemplate.batchUpdate(
                     con -> {
-                        PreparedStatement ps = con.prepareStatement(sql, new String[]{"quiz_id"});
+                        PreparedStatement ps = con.prepareStatement(INSERT_QUERY, new String[]{"quiz_id"});
                         return ps;
                     },
                     new BatchPreparedStatementSetter() {
@@ -66,11 +72,12 @@ public class QuizRepositoryImpl implements QuizRepositoryCustom {
                         public void setValues(PreparedStatement ps, int i) throws SQLException {
                             Quiz newQuiz = batchList.get(i);
                             ps.setLong(1, newQuiz.getSong().getId());
-                            if (newQuiz.getWord() != null) {
-                                ps.setLong(2, newQuiz.getWord().getId());
-                            } else {
+
+                            if (isSentenceQuiz(newQuiz))
                                 ps.setNull(2, Types.BIGINT);
-                            }
+                            else
+                                ps.setLong(2, newQuiz.getWord().getId());
+
                             ps.setString(3, newQuiz.getType().toString());
                         }
 
@@ -79,15 +86,32 @@ public class QuizRepositoryImpl implements QuizRepositoryCustom {
                             return batchList.size();
                         }
                     },
+
                     keyHolder
             );
-            List<Map<String, Object>> keyList = keyHolder.getKeyList();
+
+            List<Map<String, Object>> generatedKeys = keyHolder.getKeyList();
             for (int j = 0; j < batchList.size(); j++) {
-                Quiz quiz = batchList.get(j);
-                Number key = (Number) keyList.get(j).get("GENERATED_KEY");
-                quiz.initId(key.longValue());
+                Quiz currentQuiz = batchList.get(j);
+                Long key = getGeneratedKey(generatedKeys, j);
+                currentQuiz.updateId(key);
             }
+
         }
         em.flush();
+    }
+
+    private static boolean isSentenceQuiz(Quiz newQuiz) {
+        return newQuiz.getWord() == null;
+    }
+
+    private static Long getGeneratedKey(List<Map<String, Object>> generatedKeys, int index) {
+        Number key = (Number) generatedKeys.get(index).get("GENERATED_KEY");
+        return key.longValue();
+    }
+
+    private static List<Quiz> getBatchingList(List<Quiz> quizzes, int start) {
+        int end = Math.min(start + BATCH_SIZE, quizzes.size());
+        return quizzes.subList(start, end);
     }
 }

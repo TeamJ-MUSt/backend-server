@@ -20,42 +20,61 @@ import java.util.List;
 @Component
 @Slf4j
 public class NlpModule {
-    static String contextScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\context_definition.py";
-    static String similarWordScript = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\similar_words.py";
-    static String wordDbFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
-    static String embeddingFile = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\embeddings.txt";
+    static final String CONTEXT_SCRIPT = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\context_definition.py";
+    static final String SIMILAR_WORD_SCRIPT = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\similar_words.py";
+    static final String WORD_DB_FILE = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\word_db";
+    static final String EMBEDDING_FILE = "C:\\Users\\saree98\\intellij-workspace\\MUSt\\src\\main\\resources\\nlp-module\\embeddings.txt";
+    static final String PYTHON = "python";
+    static final String SENTENCE_WORD_DELIMITER = "@";
+    static final String KEY_VALUE_DELIMITER = "#";
 
-    public ArrayList<String> reflectContext(String entireQuery) throws IOException {
-        ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", contextScript, entireQuery);
-        Process extractProcess = contextProcessBuilder.start();
-        ObjectMapper objectMapper = new ObjectMapper();;
+    public static ArrayList<String> reflectContext(String entireQuery) throws IOException {
+        Process extractProcess = startPythonScript(PYTHON, CONTEXT_SCRIPT, entireQuery);
+
+
         BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
         String str = br.readLine();
-        return objectMapper.readValue(str, new TypeReference<ArrayList<String>>() {
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(str, new TypeReference<ArrayList<String>>() {
         });
     }
 
-    public List<String> getSimilarWord(String spell, int num) throws IOException {
-        ProcessBuilder contextProcessBuilder = new ProcessBuilder("python", similarWordScript, wordDbFile, embeddingFile, spell, String.valueOf(num));
-        Process extractProcess = contextProcessBuilder.start();
+    public static List<String> getSpellingOfSimilarWord(String spell, int wordNum) throws IOException {
+        Process extractProcess = startPythonScript(PYTHON, SIMILAR_WORD_SCRIPT, WORD_DB_FILE, EMBEDDING_FILE, spell, String.valueOf(wordNum));
+
         List<SimilarWord> wordData = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(extractProcess.getInputStream(), StandardCharsets.UTF_8));
             String str = br.readLine().replaceAll("'", "\"");
+
             ObjectMapper mapper = new ObjectMapper();
-            wordData = mapper.readValue(str, new TypeReference<List<SimilarWord>>() {
-            });
+            wordData = mapper.readValue(str, new TypeReference<List<SimilarWord>>() {});
         } catch (Exception e) {
             System.out.println("에러 메세지 : " + e.getMessage());
         }
         return wordData.stream().map(SimilarWord::getLemma).toList();
     }
-    public String createQuerySentence(String lyric, Word word, String conjugation) throws JsonProcessingException {
+
+    public static String createQuerySentence(String lyric, Word word, String conjugation) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        WordData wordData = new WordData(conjugation, word.getMeaning().stream().map(Meaning::getMeaning).toList());
+        List<String> meanings = word.getMeaning().stream().map(Meaning::getContent).toList();
+        WordData wordData = new WordData(conjugation, meanings);
 
         String[] sentences = lyric.split("\\\\n");
 
+        String targetSentence = findMatchingSentence(conjugation, sentences);
+        String query = getSingleWordQuery(targetSentence, mapper, wordData);
+
+        return query.replace("\"", KEY_VALUE_DELIMITER);
+    }
+
+    private static Process startPythonScript(String... commandLineInputs) throws IOException {
+        ProcessBuilder searchProcessBuilder = new ProcessBuilder(commandLineInputs);
+        return searchProcessBuilder.start();
+    }
+
+    private static String findMatchingSentence(String conjugation, String[] sentences) {
         String targetSentence = "";
         for (String sentence : sentences) {
             if (sentence.contains(conjugation)) {
@@ -63,9 +82,11 @@ public class NlpModule {
                 break;
             }
         }
-        String query = targetSentence + "@" + mapper.writeValueAsString(wordData);
+        return targetSentence;
+    }
 
-        return query.replace('\"', '#');
+    private static String getSingleWordQuery(String targetSentence, ObjectMapper mapper, WordData wordData) throws JsonProcessingException {
+        return targetSentence + SENTENCE_WORD_DELIMITER + mapper.writeValueAsString(wordData);
     }
 
     @Getter

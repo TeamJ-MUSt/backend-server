@@ -34,8 +34,11 @@ public class SongController {
 
     @GetMapping(value = "/main/songs")
     public HomeDto songs(@SessionAttribute(name = "memberId", required = false) Long memberId) {
-        List<Song> userSong = songService.findUserSong(memberId);
-        List<MainSongDto> list = userSong.stream()
+
+        List<Song> songsOfMember = songService.findSongOfMember(memberId);
+
+        List<MainSongDto> mainSongDtos = songsOfMember
+                .stream()
                 .map(s -> new MainSongDto(
                         s.getId(),
                         s.getTitle(),
@@ -43,40 +46,65 @@ public class SongController {
                         new String(s.getLyric()),
                         s.getLevel())
                 ).toList();
-        return new HomeDto(list, 5, 5);
+
+        return new HomeDto(mainSongDtos, 5, 5);
 
     }
 
     @GetMapping("/song/words")
     public List<WordDto> usedWords(@RequestParam("songId") Long songId) {
-        List<Word> wordsInSong = songRepository.findWithSongWord(songId);
-        return wordsInSong.stream().map(WordDto::new).toList();
+
+        List<Word> wordsInSong = songRepository.findWithSongWordBySongId(songId);
+
+        return wordsInSong
+                .stream()
+                .map(WordDto::new)
+                .toList();
     }
 
     @GetMapping("/song/search")
-    public SearchResultDto searchSong(@ModelAttribute SongSearch songSearch, @SessionAttribute(name = "memberId", required = false) Long memberId) {
+    public SearchResultDto searchSong(
+            @ModelAttribute SongSearch songSearch,
+            @SessionAttribute(name = "memberId", required = false) Long memberId
+    ) {
+
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
-        List<Tuple> resultSet = songService.searchSong(memberId, title, artist);
-        List<SearchedSongDto> result = resultSet.stream()
-                .map(t -> new SearchedSongDto(
-                        t.get(0, Song.class),
-                        t.get(1, Boolean.class))).toList();
 
-        if (result.isEmpty())
+        List<Tuple> foundSongsInDb = songService.searchSongWithCheckingRegisterStatus(memberId, title, artist);
+
+        List<SearchedSongDto> foundSongDtos = foundSongsInDb.stream()
+                .map(
+                        t -> new SearchedSongDto(
+                                t.get(0, Song.class),
+                                t.get(1, Boolean.class)
+                        )
+                )
+                .toList();
+
+        if (hasNoRequestSongInDb(foundSongDtos))
             return new SearchResultDto(null, false);
-        else
-            return new SearchResultDto(result, true);
+
+        return new SearchResultDto(foundSongDtos, true);
+    }
+
+    private static boolean hasNoRequestSongInDb(List<SearchedSongDto> searchedSongDtos) {
+        return searchedSongDtos.isEmpty();
     }
 
     @PostMapping("/song/remote")
     public SearchResultDto searchRemote(@ModelAttribute SongSearch songSearch) throws NoSearchResultException {
+
         String title = songSearch.getTitle();
         String artist = songSearch.getArtist();
 
-        List<Song> newSongs = songService.searchRemoteSong(title, artist);
-        List<SearchedSongDto> result = newSongs.stream()
-                .map(s -> new SearchedSongDto(s, false)).toList();
+        List<Song> searchedSongsFromWeb = songService.searchSongRemotely(title, artist);
+
+        List<SearchedSongDto> result = searchedSongsFromWeb
+                .stream()
+                .map(s -> new SearchedSongDto(s, false))
+                .toList();
+
         return new SearchResultDto(result, true);
 
     }
@@ -84,21 +112,28 @@ public class SongController {
     @PostMapping("/songs/new")
     public RegisterResultDto register(
             @ModelAttribute RegisterDto registerDto,
-            @SessionAttribute(name = "memberId", required = false) Long memberId) throws IOException {
-        boolean result = songService.registerSong(memberId, registerDto.getSongId(), registerDto.getBugsId());
-        return new RegisterResultDto(result);
+            @SessionAttribute(name = "memberId", required = false) Long memberId
+    ) throws IOException {
+
+        boolean registerResult = songService.registerSong(memberId, registerDto.getSongId(), registerDto.getBugsId());
+
+        return new RegisterResultDto(registerResult);
     }
 
     @GetMapping(value = "/image/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] search(@PathVariable("songId") Long songId) {
-        Song song = songRepository.findById(songId).get();
-        return song.getThumbnail();
+
+        Song findSong = songRepository.findById(songId).get();
+
+        return findSong.getThumbnail();
     }
 
     @GetMapping(value = "/image/small/{songId}", produces = MediaType.IMAGE_JPEG_VALUE)
     public byte[] image(@PathVariable("songId") Long songId) {
-        Song song = songRepository.findById(songId).get();
-        return song.getSmallThumbnail();
+
+        Song findSong = songRepository.findById(songId).get();
+
+        return findSong.getSmallThumbnail();
     }
 
     @Getter
